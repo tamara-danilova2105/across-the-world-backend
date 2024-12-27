@@ -1,0 +1,226 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "FURNITURE-STORE API Documentation",
+        "description": "FURNITURE-STORE API",
+        "version": "1.0",
+        "host": "localhost:8000"
+    },
+    "tags": [
+        {
+            "name": "Registration"
+        }
+    ],
+    "paths": {
+        "/registration": {
+            "post": {
+                "tags": ["Registration"],
+                "description": "Регистрация новых пользователей",
+                "parameters": [
+                    {
+                        "name": "Registration",
+                        "in": "body",
+                        "required": "true",
+                        "schema" : {
+                            "$ref" : "#definitions/AuthAdmin"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Пользователь зарегистрирован",
+                        "schema": {
+                            "$ref": "#definitions/AuthAdmin"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка регистрации"
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": ["Registration"],
+                "description": "Вход пользователя в аккаунт",
+                "parameters": [
+                    {
+                        "name": "Login",
+                        "in": "body",
+                        "required": "true",
+                        "schema" : {
+                            "$ref" : "#definitions/LoginAdmin"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешный вход",
+                        "schema": {
+                            "$ref": "#definitions/LoginAdmin"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный логин или пароль"
+                    },
+                    "404": {
+                        "description": "Профиль пользователя не найден"
+                    }
+                }
+            }
+        },
+        "/reset-password": {
+            "post": {
+                "tags": ["Registration"],
+                "description": "Сброс пароля для смены",
+                "parameters": [
+                    {
+                        "name": "Reset",
+                        "in": "body",
+                        "required": "true",
+                        "schema" : {
+                            "$ref" : "#definitions/ResetAdmin"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успещный сброс пароля",
+                        "schema": {
+                            "$ref": "#definitions/ResetAdmin"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный пароль"
+                    },
+                    "404": {
+                        "description": "Профиль админ не найден"
+                    }
+                }
+            }
+        },
+        "/refresh-password": {
+            "put": {
+                "tags": ["Registration"],
+                "description": "Изменение пароля и сохранение нового в базе данных.",
+                "parameters": [
+                    {
+                        "name": "Refresh",
+                        "in": "body",
+                        "required": "true",
+                        "schema" : {
+                            "$ref" : "#definitions/RefreshAdmin"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Пароль успешно изменен",
+                        "schema": {
+                            "$ref": "#definitions/RefreshAdmin"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный или недействительный токен"
+                    },
+                    "404": {
+                        "description": "Профиль пользователя не найден"
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "delete": {
+                "tags": ["Registration"],
+                "description": "Выход из системы",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Успешный выход",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка выхода"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "AuthAdmin" : {
+            "required": [
+                "login", 
+                "password", 
+                "email"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "LoginAdmin" : {
+            "required": [
+                "login", 
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "ResetAdmin" : {
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type":"string"
+                }
+            }
+        },
+        "RefreshAdmin" : {
+            "required": [
+                "resetToken", 
+                "newPassword"
+            ],
+            "properties": {
+                "resetToken": {
+                    "type": "string"
+                },
+                "newPassword": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
