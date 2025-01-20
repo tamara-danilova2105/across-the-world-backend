@@ -8,7 +8,12 @@ const { registration,
     logout, 
     resetPassword, 
     refreshPassword, 
-    refresh } = require('./controllers/authController')
+    refresh } = require('./controllers/authController');
+const { getAllTours,
+    getTour, 
+    addTour, 
+    editTour, 
+    deleteTour } = require('./controllers/tourController');
 
 router.post('/registration',
     [
@@ -18,7 +23,6 @@ router.post('/registration',
     ], 
     registration
 )
-
 router.post('/login',
     [
         body('login').notEmpty().withMessage('Логин обязателен'),
@@ -26,16 +30,13 @@ router.post('/login',
     ],
     login
 )
-
 router.delete('/logout', logout)
-
 router.post('/reset-password',
     [
         body('email').isEmail().withMessage('Некорректный email')
     ], 
     resetPassword
 )
-
 router.put('/refresh-password',
     [
         body('resetToken').notEmpty().withMessage('Токен обязателен'),
@@ -44,8 +45,14 @@ router.put('/refresh-password',
     refreshPassword
 )
 
-router.put('/refresh', refresh)
 
+router.get('/get-all-tours', getAllTours)
+router.get('/get-tour/:id', getTour)
+router.post('/add-tour', addTour)
+router.put('/edit-tour/:id', editTour)
+router.delete('/delete-tour/:id', deleteTour)
+
+router.put('/refresh', refresh)
 router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))
 
