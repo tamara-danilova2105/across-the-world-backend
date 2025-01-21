@@ -1,17 +1,46 @@
 const tourModel = require('../models/tour-model')
+const { buildFilterQuery } = require('../utils/buildFilterQuery')
+const { buildSortQuery } = require('../utils/buildSortQuery')
 
 class TourController {
-
     async getAllTours(req, res, next) {
         try {
-            const tours = await tourModel.find()
-            res.status(200).json(tours)
+            const { sort, filter } = req.query;
+            const parsedSort = sort ? JSON.parse(sort) : {}
+            const sorting = buildSortQuery(parsedSort)
+
+            const parsedFilter = filter ? JSON.parse(filter) : {}
+            const filters = buildFilterQuery(parsedFilter)
+
+            console.log(sort, filter)
+
+            const { limit , page } = req.params;
+            const parsedLimit = parseInt(limit)
+            const parsedPage = parseInt(page)
+
+            const tours = await tourModel.find(filters)
+                .sort(sorting)
+                .skip((parsedPage - 1) * parsedLimit)
+                .limit(Number(parsedLimit))
+            
+            if (tours.length === 0) {
+                return res.status(404).json({ message: 'Товары не найдены' });
+            }
+            
+            const allTours = await tourModel.countDocuments(filters)
+
+            res.status(200).json({
+                tours,
+                allTours,
+                currentPage: Number(parsedPage),
+                totalPages: Math.ceil(allTours / parsedLimit),
+            })
         } catch (error) {
             next(error)
         }
     }
 
-    async getTour(req, res, next) {
+    async getTourById(req, res, next) {
         try {
             const { id } = req.params;
             const tour = await tourModel.findById(id)

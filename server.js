@@ -9,7 +9,7 @@ const errorHandler = require('./middleware/errorMidleware')
 require('dotenv').config()
 
 mongoose.set('strictQuery', false)
-const PORT = process.env.port || 6000
+const PORT = process.env.port || 8000
 
 app.use(express.json())
 app.use(bodyParser.json())

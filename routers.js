@@ -10,7 +10,7 @@ const { registration,
     refreshPassword, 
     refresh } = require('./controllers/authController');
 const { getAllTours,
-    getTour, 
+    getTourById, 
     addTour, 
     editTour, 
     deleteTour } = require('./controllers/tourController');
@@ -44,15 +44,15 @@ router.put('/refresh-password',
     ],
     refreshPassword
 )
-
-
-router.get('/get-all-tours', getAllTours)
-router.get('/get-tour/:id', getTour)
-router.post('/add-tour', addTour)
-router.put('/edit-tour/:id', editTour)
-router.delete('/delete-tour/:id', deleteTour)
-
 router.put('/refresh', refresh)
+
+
+router.get('/tours/:limit/:page', getAllTours)
+router.get('/tours/:id', getTourById)
+router.post('/tours', addTour)
+router.put('/tours/:id', editTour)
+router.delete('/tours/:id', deleteTour)
+
 router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))
 
