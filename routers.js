@@ -56,4 +56,4 @@ router.delete('/tours/:id', deleteTour)
 router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))
 
-module.exports = router
+module.exports = router 

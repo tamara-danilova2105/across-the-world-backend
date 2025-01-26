@@ -34,7 +34,7 @@ class AuthService {
         const token = TokenService.generateTokens({ id: admin._id.toString() })
         await TokenService.saveToken(admin._id, token.refreshToken)
 
-        return { admin, token }
+        return ({ admin, token })
     }
 
     async logout(refreshToken) {
@@ -48,7 +48,7 @@ class AuthService {
             throw ApiError.NotFound('Админ с таким email не найден!')
         }
 
-        const resetToken = TokenService.resetToken(email)
+        const resetToken = TokenService.resetToken(email) 
         await MailService.sendResetPasswordEmail(email, resetToken)
         return { resetToken, message: "Инструкция для смены пароля отправлена на почту" }
     }

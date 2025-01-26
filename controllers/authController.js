@@ -32,6 +32,7 @@ class AuthController {
             });
             return res.json(adminData)
         } catch (e) {
+            console.log(e)
             next(ApiError.BadRequest('Ошибка входа'))
         }
     }
