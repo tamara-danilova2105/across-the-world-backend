@@ -66,7 +66,7 @@ const tourSchema = new mongoose.Schema(
         imageCover: { type: [imageSchema], required: true },
         direction: {
             type: [String],
-            enum: ['все туры', 'Россия', 'Заграница'],
+            enum: ['Россия', 'Заграница'],
             required: true,
         },
         regions: { type: [String], required: true },
