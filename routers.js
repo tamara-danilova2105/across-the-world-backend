@@ -19,6 +19,18 @@ const { getAllBlogs,
     addBlog, 
     editBlog, 
     deleteBlog } = require('./controllers/blogController');
+const { getRegions, 
+    addNewRegion, 
+    deleteRegion } = require('./controllers/regionController');
+const { getReviews, 
+    addReview, 
+    updateReview, 
+    moderateReview, 
+    deleteReview } = require('./controllers/reviewsController');
+const { getTimer, 
+    addNewTimer, 
+    editTimer, 
+    deleteTimer } = require('./controllers/timerController');
 
 router.post('/registration',
     [
@@ -62,6 +74,21 @@ router.get('/blog/:id', getBlog),
 router.post('/blog', addBlog)
 router.put('/blog/:id', editBlog)
 router.delete('/blog/:id', deleteBlog)
+
+router.get('/region', getRegions);
+router.post('/region', addNewRegion);
+router.delete('/region/:id', deleteRegion);
+
+router.get('/review', getReviews)
+router.post('/review', addReview)
+router.put('/review/:id', updateReview)
+router.put('/review/:id', moderateReview)
+router.delete('/review/:id', deleteReview)
+
+router.get('/timer', getTimer)
+router.post('/timer', addNewTimer)
+router.put('/timer/:id', editTimer)
+router.delete('/timer/:id', deleteTimer)
 
 router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))

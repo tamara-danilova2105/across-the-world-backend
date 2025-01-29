@@ -9,7 +9,7 @@ const RegionSchema = new mongoose.Schema({
     region: {
         type: String,
         required: true,
-        unique: true, // Запрещает дублировать регионы
+        unique: true, 
         trim: true
     }
 });

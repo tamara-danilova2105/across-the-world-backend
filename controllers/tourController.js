@@ -98,7 +98,9 @@ class TourController {
     async editTour(req, res, next) {
         try {
             const { id } = req.params;
-            const updatedTour = await tourModel.findByIdAndUpdate(id, req.body)
+            const updatedTour = await tourModel.findByIdAndUpdate(
+                id, req.body,
+                { new: true })
             if (!updatedTour) {
                 return res.status(404).json({ message: 'Тур не найден' })
             }

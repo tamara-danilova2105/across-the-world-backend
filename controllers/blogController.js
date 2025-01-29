@@ -69,7 +69,9 @@ class BlogController {
                 return res.status(400).json({ message: 'ID новости не указан' })
             }
 
-            const updatedBlog = await NewsBlogModel.findByIdAndUpdate(id, req.body)
+            const updatedBlog = await NewsBlogModel.findByIdAndUpdate(
+                id, req.body,
+                { new: true })
             
             if (!updatedBlog) {
                 return res.status(404).json({ message: 'Блог не найден' })
