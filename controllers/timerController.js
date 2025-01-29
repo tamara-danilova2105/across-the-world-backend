@@ -6,8 +6,8 @@ class TimerController {
             const timer = await TimerModel.find()
 
             if(!timer || timer.length === 0) {
-                res.status(404).json({
-                    message: 'Таймер не найден'
+                res.status(200).json({
+                    message: 'Таймер не найден',
                 })
             }
 

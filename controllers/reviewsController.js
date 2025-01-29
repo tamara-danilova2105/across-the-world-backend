@@ -17,10 +17,6 @@ class ReviewController {
                 })
             } else {
                 const moderatedReviews = await ReviewModel.find({ isModeration: true })
-                
-                if (moderatedReviews.length === 0) {
-                    return res.status(404).json({ message: 'Отзывы не найдены' })
-                }
 
                 return res.status(200).json(moderatedReviews)
             }

@@ -72,7 +72,7 @@ router.delete('/tours/:id', deleteTour)
 
 router.get('/blog/:limit/:page', getAllBlogs)
 router.get('/blog/:id', getBlog),
-    router.post('/blog', addBlog)
+router.post('/blog', addBlog)
 router.put('/blog/:id', editBlog)
 router.delete('/blog/:id', deleteBlog)
 

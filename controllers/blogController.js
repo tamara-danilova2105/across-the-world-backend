@@ -10,10 +10,6 @@ class BlogController {
             const blogs = await NewsBlogModel.find()
                 .skip((parsedPage - 1) * parsedLimit)
                 .limit(Number(parsedLimit))
-        
-            if (blogs.length === 0) {
-                return res.status(404).json({ message: 'Новости не найдены' });
-            }
 
             res.status(200).json({
                 blogs,
