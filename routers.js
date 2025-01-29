@@ -14,6 +14,11 @@ const { getAllTours,
     addTour, 
     editTour, 
     deleteTour } = require('./controllers/tourController');
+const { getAllBlogs, 
+    getBlog, 
+    addBlog, 
+    editBlog, 
+    deleteBlog } = require('./controllers/blogController');
 
 router.post('/registration',
     [
@@ -46,12 +51,17 @@ router.put('/refresh-password',
 )
 router.put('/refresh', refresh)
 
-
 router.get('/tours/:limit/:page', getAllTours)
 router.get('/tours/:id', getTourById)
 router.post('/tours', addTour)
 router.put('/tours/:id', editTour)
 router.delete('/tours/:id', deleteTour)
+
+router.get('/blog/:limit/:page', getAllBlogs)
+router.get('/blog/:id', getBlog),
+router.post('/blog', addBlog)
+router.put('/blog/:id', editBlog)
+router.delete('/blog/:id', deleteBlog)
 
 router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))

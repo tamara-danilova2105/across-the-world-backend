@@ -1,15 +1,17 @@
 const mongoose = require('mongoose')
 
-const imageSchema = new mongoose.Schema({
-    src: { type: String, required: true },
-    alt: { type: String, required: true }
-})
-
 const timerSchema = new mongoose.Schema({
     title: {type: String, required: true},
     description: {type: String, required: true},
     timer: {type: Date, required: true},
-    images: [imageSchema]
+    images: [
+        {
+            _id: { type: String, required: true },
+            src: { type: String, required: true },
+            header: {type: String, required: true },
+            describe: {type: String, required: true },
+        },
+    ],
 })
 
 module.exports = mongoose.model(`Timer`, timerSchema)
