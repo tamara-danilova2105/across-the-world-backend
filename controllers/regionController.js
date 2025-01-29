@@ -2,35 +2,47 @@ const RegionModel = require('../models/region-model');
 
 class RegionController {
     async getRegions(req, res, next) {
-        try{
-            const { direction } = req.query;
+        try {
+            const { search, direction } = req.query;
 
-            const query = direction ? { direction } : {}
-            const regions = await RegionModel.find(query)
+            let query = {};
 
-            if (regions.length === 0) {
-                return res.status(404).json({ message: 'Регионы не найдены' })
+            if (direction) {
+                if (direction !== "Россия" && direction !== "Заграница") {
+                    return res.status(400).json({ message: "Некорректное направление. Доступны: Россия, Заграница." });
+                }
+                query.direction = direction;
             }
 
-            if (!direction) {
-                const russianRegions = regions.filter(r => r.direction === 'Россия')
-                const foreignRegions = regions.filter(r => r.direction === 'Заграница')
-
-                return res.status(200).json({
-                    regions,
-                    russianRegions,
-                    foreignRegions
-                })
+            if (search) {
+                query.region = new RegExp(`^${search}`, 'i');
             }
 
-            res.status(200).json(regions)
-        } catch(e) {
-            next(e)
+            const regions = await RegionModel.find(query);
+            res.status(200).json(regions);
+        } catch (e) {
+            next(e);
+        }
+    }
+
+    async getRegionsByDirection(req, res, next) {
+        try {
+            const { direction } = req.params;
+
+            if (direction !== "Россия" && direction !== "Заграница") {
+                return res.status(400).json({ message: "Некорректное направление. Доступны: Россия, Заграница." });
+            }
+
+            const regions = await RegionModel.find({ direction });
+
+            res.status(200).json(regions);
+        } catch (e) {
+            next(e);
         }
     }
 
     async addNewRegion(req, res, next) {
-        try{
+        try {
             const {
                 direction,
                 region
@@ -39,33 +51,34 @@ class RegionController {
             const uniqueRegion = await RegionModel.findOne({ region });
 
             if (uniqueRegion) {
-                return res.status(409).json({ 
-                    message: 'Такой регион уже существует' })
+                return res.status(409).json({
+                    message: 'Такой регион уже существует'
+                })
             }
 
             const newRegion = new RegionModel({
                 direction,
                 region
             })
-            
+
             const addNewRegion = await newRegion.save()
-            res.status(200).json({message:'Регион добавлен', addNewRegion})
-        } catch(e) {
+            res.status(200).json({ message: 'Регион добавлен', addNewRegion })
+        } catch (e) {
             next(e)
         }
     }
     async deleteRegion(req, res, next) {
-        try{
-            const { id } = req.params
+        try {
+            const { region } = req.params
 
-            const deletedRegion = await RegionModel.findByIdAndDelete(id)
+            const deletedRegion = await RegionModel.findByIdAndDelete(region)
 
-            if(!deletedRegion) {
-                res.status(404).json({message: 'Регион не найден'})
+            if (!deletedRegion) {
+                res.status(404).json({ message: 'Регион не найден' })
             }
 
-            res.status(200).json({ message: 'Регион удален', deletedRegion})
-        } catch(e) {
+            res.status(200).json({ message: 'Регион удален', deletedRegion })
+        } catch (e) {
             next(e)
         }
     }
