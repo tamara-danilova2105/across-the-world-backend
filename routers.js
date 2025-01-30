@@ -80,10 +80,10 @@ router.get('/regions', getRegions);
 router.post('/regions', addNewRegion);
 router.delete('/regions/:region', deleteRegion);
 
-router.get('/review', getReviews)
-router.post('/review', addReview)
-router.put('/review/:id', moderateReview)
-router.delete('/review/:id', deleteReview)
+router.get('/reviews', getReviews)
+router.post('/reviews', addReview)
+router.put('/reviews/:id', moderateReview)
+router.delete('/reviews/:id', deleteReview)
 
 router.get('/timer', getTimer)
 router.post('/timer', addNewTimer)
