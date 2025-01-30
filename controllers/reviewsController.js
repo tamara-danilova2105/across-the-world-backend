@@ -3,81 +3,58 @@ const ReviewModel = require('../models/reviews-model');
 class ReviewController {
     async getReviews(req, res, next) {
         try {
-            const { isAuth } = req.query;
-            
-            if (isAuth === 'true') {
-                const [moderatedReviews, unmoderatedReviews] = await Promise.all([
-                    ReviewModel.find({ isModeration: true }),
-                    ReviewModel.find({ isModeration: false })
-                ])
+            //reviews?isModeration=false
+            //1) отображать в админке - только те отзывы, где isModeration === false
+            //reviews
+            //2) отображать на странице отзывы все отзывы, которые имею статус isModeration === true
+            //reviews?isModeration=false&tourId=123
+            //3) отображать на странице туров отзывы, которые относятся к этому туру
 
-                return res.status(200).json({
-                    moderatedReviews,
-                    unmoderatedReviews
-                })
+            const { isModeration, tourId } = req.query;
+
+            const filter = {};
+
+            if (isModeration === 'false') {
+                filter.isModeration = false;
             } else {
-                const moderatedReviews = await ReviewModel.find({ isModeration: true })
-
-                return res.status(200).json(moderatedReviews)
+                filter.isModeration = true;
             }
+
+            if (tourId) {
+                filter.tourId = tourId;
+            }
+
+            const reviews = await ReviewModel.find(filter).lean();
+
+            return res.status(200).json(reviews);
         } catch (e) {
-            next(e)
+            next(e);
         }
     }
 
     async addReview(req, res, next) {
         try {
-            const { 
+            const {
                 name,
-                city, 
-                direction, 
-                review } = req.body
+                city,
+                feedback,
+                tourId,
+            } = req.body
 
             const newReview = new ReviewModel({
                 name,
                 city,
-                direction,
-                review,
-                isModeration: false 
+                feedback,
+                tourId,
+                isModeration: false
             })
 
             const savedReview = await newReview.save()
-            
+
             res.status(200).json({
                 message: 'Отзыв добавлен и ожидает модерации',
                 savedReview
             })
-        } catch (e) {
-            next(e)
-        }
-    }
-
-    async updateReview(req, res, next) {
-        try {
-            const { id } = req.params;
-
-            if (!id) {
-                return res.status(400).json({ message: 'ID не указан' });
-            }
-
-            const updatedReview = await ReviewModel.findByIdAndUpdate(
-                id, req.body,
-                { new: true })
-
-            if (!updatedReview) {
-                return res.status(404).json({ message: 'Отзыв не найден' });
-            }
-
-            const message = req.body.hasOwnProperty('isModeration')
-            ? req.body.isModeration
-                ? 'Отзыв одобрен и опубликован'
-                : 'Отзыв снят с публикации'
-            : 'Отзыв обновлен';;
-
-            res.status(200).json({
-                message,
-                updatedReview
-            });
         } catch (e) {
             next(e)
         }
@@ -92,6 +69,10 @@ class ReviewController {
                 return res.status(400).json({ message: 'id не указан' });
             }
 
+            if (isModeration !== true) {
+                return res.status(400).json({ message: 'Неверное значение isModeration' });
+            }
+
             const updatedReview = await ReviewModel.findByIdAndUpdate(
                 id,
                 { isModeration },
@@ -103,7 +84,7 @@ class ReviewController {
             }
 
             res.status(200).json({
-                message: isModeration ? 'Отзыв одобрен и опубликован' : 'Отзыв снят с публикации',
+                message: 'Отзыв одобрен и опубликован',
                 updatedReview
             })
         } catch (e) {

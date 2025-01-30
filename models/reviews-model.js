@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const ReviewsSchema = new mongoose.Schema({
     name: {type: String, require: true},
     city: {type: String},
-    direction: {type: String, require: true},
-    review: {type: String, require: true},
-    isModeration: {type: Boolean, default: false}
+    feedback: {type: String, require: true},
+    isModeration: {type: Boolean, default: false},
+    tourId: {type: String, require: true},
 
 }, { timestamps: { createdAt: true, updatedAt: false } })
 

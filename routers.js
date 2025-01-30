@@ -82,7 +82,6 @@ router.delete('/regions/:region', deleteRegion);
 
 router.get('/review', getReviews)
 router.post('/review', addReview)
-router.put('/review/:id', updateReview)
 router.put('/review/:id', moderateReview)
 router.delete('/review/:id', deleteReview)
 
