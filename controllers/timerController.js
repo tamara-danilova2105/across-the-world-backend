@@ -1,4 +1,5 @@
 const TimerModel = require('../models/timer-model')
+const { updateFile } = require('../services/uploadService')
 
 class TimerController {
     async getTimer(req, res, next) {
@@ -23,12 +24,14 @@ class TimerController {
                 title,
                 description,
                 timer,
+                region,
                 images } = req.body 
 
             const newTimer = new TimerModel({
                 title,
                 description,
                 timer,
+                region,
                 images
             })
 
@@ -43,13 +46,22 @@ class TimerController {
     async editTimer(req, res, next) {
         try{
             const {id} = req.params
+            const { updateData } = req.body
+            const timer = await TimerModel.findById(id)
 
             if (!id) {
                 return res.status(400).json({ message: 'id не указан' })
             }
 
+            const oldTimerImage = timer.images.map(img => img.src)
+            const newTimerImage = updateData.images.map(img => img.src)
+
+            if (oldTimerImage && newTimerImage && oldTimerImage !== newTimerImage) {
+                await updateFile(coverImages)
+            } 
+
             const updatedTimer = await TimerModel.findByIdAndUpdate(
-                id, req.body,
+                id, { updateData },
                 { new: true })
             
             if(!updatedTimer) {

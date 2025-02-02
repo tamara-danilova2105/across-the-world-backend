@@ -4,6 +4,7 @@ const app = express()
 const bodyParser = require("body-parser")
 const cors = require('cors')
 const router = require('./routers')
+// const uploadRouter = require('./services/uploadService')
 const errorHandler = require('./middleware/errorMidleware')
 
 require('dotenv').config()
@@ -16,6 +17,8 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors())
 app.use(router)
+// app.use(uploadRouter)
+// app.use('/upload', express.static('upload'));
 
 mongoose
 	.connect(process.env.MONGO_LINK)

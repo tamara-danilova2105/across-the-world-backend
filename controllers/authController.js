@@ -33,7 +33,7 @@ class AuthController {
             return res.json(adminData)
         } catch (e) {
             console.log(e)
-            next(ApiError.BadRequest('Ошибка входа'))
+            next(ApiError.BadRequest('Ошибка входа')) 
         }
     }
 
@@ -41,18 +41,18 @@ class AuthController {
         try {
             const { refreshToken } = req.cookies
             const token = await AuthService.logout(refreshToken)
-            res.clearCookie('refreshToken')
+            res.clearCookie('refreshToken') 
             return res.json(token)
         } catch (e) {
             next(ApiError.BadRequest('Ошибка выхода'))
-        }
+        } 
     }
 
     async resetPassword(req, res, next) {
         try {
             const { email } = req.body;
             const response = await AuthService.resetPassword(email)
-            return res.json(response)
+            return res.json(response) 
         } catch (e) {
             next(ApiError.BadRequest('Ошибка сброса пароля'))
         }

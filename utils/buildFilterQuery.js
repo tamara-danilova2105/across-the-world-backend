@@ -1,5 +1,4 @@
-
-module.exports.buildFilterQuery = ({filters}) => {
+module.exports.buildFilterQuery = (filters) => {
     const query = {};
 
     if (!filters || typeof filters !== 'object') {

@@ -1,4 +1,5 @@
-const tourModel = require('../models/tour-model')
+const tourModel = require('../models/tour-model');
+const { updateFile } = require('../services/uploadService');
 const { buildFilterQuery } = require('../utils/buildFilterQuery')
 const { buildSortQuery } = require('../utils/buildSortQuery')
 
@@ -12,8 +13,6 @@ class TourController {
             const parsedFilter = filter ? JSON.parse(filter) : {}
             const filters = buildFilterQuery(parsedFilter)
 
-            console.log(sort, filter)
-
             const { limit , page } = req.params;
             const parsedLimit = parseInt(limit)
             const parsedPage = parseInt(page)
@@ -24,7 +23,7 @@ class TourController {
                 .limit(Number(parsedLimit))
             
             if (tours.length === 0) {
-                return res.status(404).json({ message: 'Товары не найдены' });
+                return res.status(200).json({ message: 'Туры не найдены' });
             }
             
             const allTours = await tourModel.countDocuments(filters)
@@ -98,12 +97,32 @@ class TourController {
     async editTour(req, res, next) {
         try {
             const { id } = req.params;
+            const { updatedDate } = req.body
+            const tour = await tourModel.findById(id)
+
+            const coverImages = tour.imageCover.map(img => img.src);
+            const programImages = tour.program.flatMap(day => day.images.map(img => img.src))
+            const hotelImages = tour.hotels.map(img => img.src);
+
+            const coverImagesUpdate = updatedTour.imageCover.map(img => img.src);
+            const programImagesUpdate = updatedTour.program.flatMap(day => day.images.map(img => img.src))
+            const hotelImagesUpdate = updatedTour.hotels.map(img => img.src);
+
+            if (coverImages && coverImagesUpdate && coverImages !== coverImagesUpdate) {
+                await updateFile(coverImages)
+            } else if (programImages && programImagesUpdate && programImages !== programImagesUpdate) {
+                await updateFile(programImages)
+            } else if (hotelImages && hotelImagesUpdate && hotelImages !== hotelImagesUpdate) {
+                await updateFile(hotelImages)
+            }
+
             const updatedTour = await tourModel.findByIdAndUpdate(
-                id, req.body,
+                id, { updatedDate },
                 { new: true })
             if (!updatedTour) {
                 return res.status(404).json({ message: 'Тур не найден' })
             }
+
             res.status(200).json(updatedTour)
         } catch (error) {
             next(error)
