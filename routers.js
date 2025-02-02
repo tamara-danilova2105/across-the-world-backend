@@ -3,35 +3,48 @@ const { body } = require('express-validator');
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocument = require('./swagger.json')
 const router = express.Router()
-const { registration,
+const {
+    registration,
     login,
     logout,
     resetPassword,
     refreshPassword,
-    refresh } = require('./controllers/authController');
-const { getAllTours,
+    refresh
+} = require('./controllers/authController');
+const {
+    getAllTours,
     getTourById,
     addTour,
     editTour,
-    deleteTour } = require('./controllers/tourController');
-const { getAllBlogs,
+    deleteTour
+} = require('./controllers/tourController');
+const {
+    getAllBlogs,
     getBlog,
     addBlog,
     editBlog,
-    deleteBlog } = require('./controllers/blogController');
-const { getRegions,
+    deleteBlog
+} = require('./controllers/blogController');
+const {
+    getRegions,
     addNewRegion,
     deleteRegion,
 } = require('./controllers/regionController');
-const { getReviews,
+const {
+    getReviews,
     addReview,
-    updateReview,
     moderateReview,
-    deleteReview } = require('./controllers/reviewsController');
-const { getTimer,
+    deleteReview
+} = require('./controllers/reviewsController');
+const {
+    getTimer,
     addNewTimer,
     editTimer,
-    deleteTimer } = require('./controllers/timerController');
+    deleteTimer
+} = require('./controllers/timerController');
+
+const upload = require('./middleware/uploadMiddleware');
+const { uploadPhoto } = require('./controllers/uploadController');
 
 router.post('/registration',
     [
@@ -71,7 +84,7 @@ router.put('/tours/:id', editTour)
 router.delete('/tours/:id', deleteTour)
 
 router.get('/blog/:limit/:page', getAllBlogs)
-router.get('/blog/:id', getBlog),
+router.get('/blog/:id', getBlog)
 router.post('/blog', addBlog)
 router.put('/blog/:id', editBlog)
 router.delete('/blog/:id', deleteBlog)
@@ -92,5 +105,8 @@ router.delete('/timer/:id', deleteTimer)
 
 router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))
+
+// Для загрузки нескольких файлов (до 5)
+router.post('/upload', upload.array('photos', 5), uploadPhotos);
 
 module.exports = router 

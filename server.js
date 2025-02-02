@@ -22,7 +22,8 @@ mongoose
 	.then(() => console.log('Установлено соединение с Mongo'))
 	.catch(err => console.log('Соединение не установлено или прервано c MongoDB', err))
 
-app.use(errorHandler); 
+app.use(errorHandler);
+app.use('/uploads', express.static('uploads'));
 
 app.listen(PORT, () => {
 	console.log(`Сервер запущен на порту ${PORT}`)
