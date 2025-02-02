@@ -44,7 +44,6 @@ const {
 } = require('./controllers/timerController');
 
 const upload = require('./middleware/uploadMiddleware');
-const { uploadPhoto } = require('./controllers/uploadController');
 
 router.post('/registration',
     [
@@ -106,7 +105,15 @@ router.delete('/timer/:id', deleteTimer)
 router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))
 
-// Для загрузки нескольких файлов (до 5)
-router.post('/upload', upload.array('photos', 5), uploadPhotos);
+// Конфигурация для разных типов загрузок
+const uploadNews = createStorage('uploads/news');
+//другие примеры:
+// const uploadProducts = createStorage('uploads/products');
+// const uploadProfiles = createStorage('uploads/profiles');
+// пример для обновления одного изображение
+// router.post('/profile', uploadProfiles.single('avatar'), updateProfile);
+
+// Эндпоинт для новостей
+router.post('/blogs', uploadNews.array('photos', 4), addBlog);
 
 module.exports = router 

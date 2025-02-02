@@ -1,26 +1,33 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
-// Настройка хранения файлов
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        const uniqueName = `${Date.now()}-${file.originalname}`;
-        cb(null, uniqueName);
-    }
-});
+// Функция для создания хранилища с динамическим путем
+const createStorage = (folder = 'uploads') => {
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            const uploadPath = path.join(__dirname, `../${folder}`);
+            if (!fs.existsSync(uploadPath)) {
+                fs.mkdirSync(uploadPath, { recursive: true });
+            }
+            cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+            const uniqueName = `${Date.now()}-${file.originalname}`;
+            cb(null, uniqueName);
+        }
+    });
 
-// Фильтрация типов файлов
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif/;
-    const isValid = allowedTypes.test(file.mimetype);
-    isValid ? cb(null, true) : cb(new Error('Неверный тип файла.'));
+    return multer({
+        storage,
+        fileFilter: (req, file, cb) => {
+            const allowedTypes = /jpeg|jpg|png|gif/;
+            const isValid = allowedTypes.test(file.mimetype);
+            isValid ? cb(null, true) : cb(new Error('Неверный тип файла.'));
+        }
+    });
 };
 
-// Конфигурация для загрузки нескольких файлов
-const upload = multer({ storage, fileFilter });
+module.exports = createStorage;
 
-module.exports = upload;
 

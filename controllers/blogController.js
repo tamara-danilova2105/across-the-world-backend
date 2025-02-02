@@ -2,8 +2,8 @@ const NewsBlogModel = require('../models/blog-model');
 
 class BlogController {
     async getAllBlogs(req, res, next) {
-        try{
-            const { limit , page } = req.params;
+        try {
+            const { limit, page } = req.params;
             const parsedLimit = parseInt(limit)
             const parsedPage = parseInt(page)
 
@@ -16,49 +16,47 @@ class BlogController {
                 currentPage: Number(parsedPage),
                 totalPages: Math.ceil(blogs / parsedLimit),
             })
-        } catch(e) {
+        } catch (e) {
             next(e)
         }
-    } 
+    }
 
     async getBlog(req, res, next) {
-        try{
+        try {
             const { id } = req.params
             const blog = await NewsBlogModel.findById(id)
 
-            if(!blog) {
+            if (!blog) {
                 return res.status(404).json({ message: 'Новость не найдена' })
             }
 
             res.status(200).json(blog)
-        } catch(e) {
+        } catch (e) {
             next(e)
         }
     }
 
     async addBlog(req, res, next) {
-        try{
-            const {
-                title,
-                description,
-                images
-            } = req.body
+        try {
+            const { title, description } = req.body;
+            const files = req.files;
 
-            const newBlogs = new NewsBlogModel({
-                title,
-                description,
-                images
-            })
+            const images = await Promise.all(files.map(async (file) => {
+                const optimizedSrc = await uploadService.saveFile(file);
+                return { _id: crypto.randomUUID(), src: optimizedSrc };
+            }));
 
-            const addBlog = await newBlogs.save()
-            res.status(200).json({message:'Новость добавлена', addBlog})
-        } catch(e) {
-            next(e)
+            const newBlog = new NewsBlogModel({ title, description, images });
+            const savedBlog = await newBlog.save();
+
+            res.status(200).json({ message: 'Новость добавлена', blog: savedBlog });
+        } catch (error) {
+            next(error);
         }
     }
 
     async editBlog(req, res, next) {
-        try{
+        try {
             const { id } = req.params
 
             if (!id) {
@@ -68,26 +66,26 @@ class BlogController {
             const updatedBlog = await NewsBlogModel.findByIdAndUpdate(
                 id, req.body,
                 { new: true })
-            
+
             if (!updatedBlog) {
                 return res.status(404).json({ message: 'Блог не найден' })
             }
-            res.status(200).json({message: 'Новость обновлена', updatedBlog})
-        } catch(e) {
+            res.status(200).json({ message: 'Новость обновлена', updatedBlog })
+        } catch (e) {
             next(e)
         }
     }
 
     async deleteBlog(req, res, next) {
-        try{
+        try {
             const { id } = req.params
             const deletedBlog = await NewsBlogModel.findByIdAndDelete(id)
-            if(!deletedBlog) {
+            if (!deletedBlog) {
                 return res.status(404).json({ message: 'Блог не найден' })
             }
 
-            res.status(200).json({message: 'Товар удален', deletedBlog})
-        } catch(e) {
+            res.status(200).json({ message: 'Товар удален', deletedBlog })
+        } catch (e) {
             next(e)
         }
     }
