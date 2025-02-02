@@ -4,18 +4,22 @@ const { saveFile } = require('../services/uploadService')
 class BlogController {
     async getAllBlogs(req, res, next) {
         try {
-            const { limit, page } = req.params;
-            const parsedLimit = parseInt(limit)
-            const parsedPage = parseInt(page)
+            const { limit, page } = req.query;
+
+            const parsedLimit = parseInt(limit);
+            const parsedPage = parseInt(page);
+
+            const totalBlogs = await NewsBlogModel.countDocuments();
 
             const blogs = await NewsBlogModel.find()
+                .sort({ createdAt: -1 })
                 .skip((parsedPage - 1) * parsedLimit)
                 .limit(Number(parsedLimit))
 
             res.status(200).json({
                 blogs,
-                currentPage: Number(parsedPage),
-                totalPages: Math.ceil(blogs / parsedLimit),
+                currentPage: parsedPage,
+                totalPages: Math.ceil(totalBlogs / parsedLimit),
             })
         } catch (e) {
             next(e)
@@ -48,7 +52,7 @@ class BlogController {
             }));
 
             const newBlog = new NewsBlogModel({ title, description, photos });
-            const savedBlog = await newBlog.save(); 
+            const savedBlog = await newBlog.save();
 
             res.status(200).json({ message: 'Новость добавлена', blog: savedBlog });
         } catch (error) {
@@ -56,7 +60,7 @@ class BlogController {
         }
     }
 
-    async editBlog(req, res, next) { 
+    async editBlog(req, res, next) {
         try {
             const { id } = req.params
 

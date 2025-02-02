@@ -28,6 +28,7 @@ class ReviewController {
             const parsedOffset = Math.max(0, parseInt(offset, 10)) || 0;
 
             const reviews = await ReviewModel.find(filter)
+                .sort({ createdAt: -1 })
                 .skip(parsedOffset)
                 .limit(parsedLimit)
                 .lean();

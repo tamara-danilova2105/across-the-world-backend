@@ -44,8 +44,8 @@ const {
     deleteTimer
 } = require('./controllers/timerController');
 
-const uploads = require('./middleware/uploadMiddleware');
 const createStorage = require('./middleware/uploadMiddleware');
+const uploadNews = createStorage('uploads/news');
 
 router.post('/registration',
     [
@@ -84,11 +84,11 @@ router.post('/tours', addTour)
 router.put('/tours/:id', editTour)
 router.delete('/tours/:id', deleteTour)
 
-router.get('/blog/:limit/:page', getAllBlogs)
-router.get('/blog/:id', getBlog)
-// router.post('/blog', addBlog)
-router.put('/blog/:id', editBlog)
-router.delete('/blog/:id', deleteBlog)
+router.get('/news', getAllBlogs);
+router.get('/news/:id', getBlog);
+router.post('/news', uploadNews.array('images', 4), addBlog);
+router.put('/news/:id', editBlog);
+router.delete('/news/:id', deleteBlog);
 
 router.get('/regions', getRegions);
 router.post('/regions', addNewRegion);
@@ -108,14 +108,12 @@ router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))
 
 // Конфигурация для разных типов загрузок
-const uploadNews = createStorage('uploads/news');
+
+
 //другие примеры:
 // const uploadProducts = createStorage('uploads/products');
 // const uploadProfiles = createStorage('uploads/profiles');
 // пример для обновления одного изображение
 // router.post('/profile', uploadProfiles.single('avatar'), updateProfile);
-
-// Эндпоинт для новостей
-router.post('/blog', uploadNews.array('photos', 4), addBlog);
 
 module.exports = router
