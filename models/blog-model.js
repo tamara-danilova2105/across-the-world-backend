@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
+const uuidv4 = require('uuid');
 
 const NewsBlogSchema = new mongoose.Schema(
     {
         title: { type: String, required: true },
-        description: [{ type: String, required: true }],
-        images: [
+        description: { type: String, required: true },
+        photos: [
             {
-                _id: { type: String, required: true },
+                _id: { type: String, default: uuidv4 },
                 src: { type: String, required: true },
             },
         ],

@@ -18,6 +18,7 @@ class TimerController {
     }
 
     async addNewTimer(req, res, next) {
+        console.log(req.body, req.files)
         try{
             const {
                 title,

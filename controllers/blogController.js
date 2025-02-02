@@ -1,4 +1,5 @@
 const NewsBlogModel = require('../models/blog-model');
+const { saveFile } = require('../services/uploadService')
 
 class BlogController {
     async getAllBlogs(req, res, next) {
@@ -39,23 +40,23 @@ class BlogController {
     async addBlog(req, res, next) {
         try {
             const { title, description } = req.body;
-            const files = req.files;
+            const files = req.files
 
-            const images = await Promise.all(files.map(async (file) => {
-                const optimizedSrc = await uploadService.saveFile(file);
+            const photos = await Promise.all(files.map(async (file) => {
+                const optimizedSrc = await saveFile(file);
                 return { _id: crypto.randomUUID(), src: optimizedSrc };
             }));
 
-            const newBlog = new NewsBlogModel({ title, description, images });
-            const savedBlog = await newBlog.save();
+            const newBlog = new NewsBlogModel({ title, description, photos });
+            const savedBlog = await newBlog.save(); 
 
             res.status(200).json({ message: 'Новость добавлена', blog: savedBlog });
         } catch (error) {
-            next(error);
+            next(error)
         }
     }
 
-    async editBlog(req, res, next) {
+    async editBlog(req, res, next) { 
         try {
             const { id } = req.params
 

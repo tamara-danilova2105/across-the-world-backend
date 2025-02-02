@@ -24,11 +24,11 @@ const saveFile = async (file) => {
         return `/uploads/${optimizedFileName}`; // Возвращение пути к оптимизированному файлу
     } catch (error) {
         console.error('Ошибка оптимизации изображения:', error);
-        throw new Error('Ошибка при обработке изображения.');
+        throw new Error('Ошибка при обработке изображения.'); 
     }
-};
+}
 
-module.exports = { saveFile };
+module.exports = { saveFile }
 
 
 

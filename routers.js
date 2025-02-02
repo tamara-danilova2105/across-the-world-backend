@@ -23,7 +23,8 @@ const {
     getBlog,
     addBlog,
     editBlog,
-    deleteBlog
+    deleteBlog,
+    blog
 } = require('./controllers/blogController');
 const {
     getRegions,
@@ -43,7 +44,8 @@ const {
     deleteTimer
 } = require('./controllers/timerController');
 
-const upload = require('./middleware/uploadMiddleware');
+const uploads = require('./middleware/uploadMiddleware');
+const createStorage = require('./middleware/uploadMiddleware');
 
 router.post('/registration',
     [
@@ -84,7 +86,7 @@ router.delete('/tours/:id', deleteTour)
 
 router.get('/blog/:limit/:page', getAllBlogs)
 router.get('/blog/:id', getBlog)
-router.post('/blog', addBlog)
+// router.post('/blog', addBlog)
 router.put('/blog/:id', editBlog)
 router.delete('/blog/:id', deleteBlog)
 
@@ -114,6 +116,6 @@ const uploadNews = createStorage('uploads/news');
 // router.post('/profile', uploadProfiles.single('avatar'), updateProfile);
 
 // Эндпоинт для новостей
-router.post('/blogs', uploadNews.array('photos', 4), addBlog);
+router.post('/blog', uploadNews.array('photos', 4), addBlog);
 
-module.exports = router 
+module.exports = router
