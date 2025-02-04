@@ -1,5 +1,7 @@
 const NewsBlogModel = require('../models/blog-model');
-const { saveFile } = require('../services/uploadService')
+const { saveFile } = require('../services/uploadService');
+const path = require('path');
+const fs = require('fs');
 
 class BlogController {
     async getAllBlogs(req, res, next) {
@@ -83,15 +85,34 @@ class BlogController {
 
     async deleteBlog(req, res, next) {
         try {
-            const { id } = req.params
-            const deletedBlog = await NewsBlogModel.findByIdAndDelete(id)
+            const { id } = req.params;
+            const deletedBlog = await NewsBlogModel.findByIdAndDelete(id);
+
+            console.log(deletedBlog);
+            
+
             if (!deletedBlog) {
-                return res.status(404).json({ message: 'Блог не найден' })
+                return res.status(404).json({ message: 'Блог не найден' });
             }
 
-            res.status(200).json({ message: 'Товар удален', deletedBlog })
+            // Удаление связанных изображений
+            if (deletedBlog.photos && deletedBlog.photos.length > 0) {
+                deletedBlog.photos.forEach(({ src }) => {
+                    const fullPath = path.join(__dirname, '..', src);
+                    fs.unlink(fullPath, (err) => {
+                        if (err) {
+                            console.error(`Ошибка при удалении файла: ${fullPath}`, err);
+                        } else {
+                            console.log(`Файл успешно удален: ${fullPath}`);
+                        }
+                    });
+                });
+            }
+    
+
+            res.status(200).json({ message: 'Блог и связанные изображения удалены', deletedBlog });
         } catch (e) {
-            next(e)
+            next(e);
         }
     }
 }
