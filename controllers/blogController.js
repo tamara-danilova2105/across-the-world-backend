@@ -64,22 +64,56 @@ class BlogController {
 
     async editBlog(req, res, next) {
         try {
-            const { id } = req.params
+            const { id } = req.params;
+            const { title, description } = req.body;
+            const files = req.files;
+
+            const deletedImages = JSON.parse(req.body.deletedImages || '[]');
 
             if (!id) {
-                return res.status(400).json({ message: 'ID новости не указан' })
+                return res.status(400).json({ message: 'ID новости не указан' });
             }
 
-            const updatedBlog = await NewsBlogModel.findByIdAndUpdate(
-                id, req.body,
-                { new: true })
+            //Удаление старых изображений из папки uploads
+            deletedImages.forEach(imageName => {
+                const decodedImageId = decodeURIComponent(imageName);
+                const imagePath = path.join(__dirname, '..', 'uploads', `${decodedImageId}`);
+                if (fs.existsSync(imagePath)) {
+                    fs.unlinkSync(imagePath);
+                }
+            });
 
-            if (!updatedBlog) {
-                return res.status(404).json({ message: 'Блог не найден' })
+            const newPhotos = await Promise.all(files.map(async (file) => {
+                const optimizedSrc = await saveFile(file);
+                return { _id: crypto.randomUUID(), src: optimizedSrc };
+            }));
+
+            //Обновление данных в базе данных
+            const existingBlog = await NewsBlogModel.findById(id);
+            if (!existingBlog) {
+                return res.status(404).json({ message: 'Блог не найден' });
             }
-            res.status(200).json({ message: 'Новость обновлена', updatedBlog })
-        } catch (e) {
-            next(e)
+
+
+            //Фильтрация оставшихся изображений после удаления
+            const updatedPhotos = existingBlog.photos.filter((photo) => {
+                const photoName = photo.src.split('/').pop(); // Получаем имя файла
+                const encodedPhotoName = encodeURIComponent(photoName ?? ''); // Кодируем, так как могут быть пробелы в названии
+
+                return !deletedImages.includes(encodedPhotoName);
+            });
+
+            const finalPhotos = [...updatedPhotos, ...newPhotos];
+
+            existingBlog.title = title;
+            existingBlog.description = description;
+            existingBlog.photos = finalPhotos;
+
+            const updatedBlog = await existingBlog.save();
+
+            res.status(200).json({ message: 'Новость обновлена', updatedBlog });
+        } catch (error) {
+            next(error);
         }
     }
 
@@ -87,9 +121,6 @@ class BlogController {
         try {
             const { id } = req.params;
             const deletedBlog = await NewsBlogModel.findByIdAndDelete(id);
-
-            console.log(deletedBlog);
-            
 
             if (!deletedBlog) {
                 return res.status(404).json({ message: 'Блог не найден' });
@@ -108,7 +139,7 @@ class BlogController {
                     });
                 });
             }
-    
+
 
             res.status(200).json({ message: 'Блог и связанные изображения удалены', deletedBlog });
         } catch (e) {

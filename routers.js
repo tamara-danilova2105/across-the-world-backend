@@ -87,7 +87,7 @@ router.delete('/tours/:id', deleteTour)
 router.get('/news', getAllBlogs);
 router.get('/news/:id', getBlog);
 router.post('/news', uploadNews.array('images', 4), addBlog);
-router.put('/news/:id', editBlog);
+router.put('/news/:id', uploadNews.array('images', 4), editBlog);
 router.delete('/news/:id', deleteBlog);
 
 router.get('/regions', getRegions);
