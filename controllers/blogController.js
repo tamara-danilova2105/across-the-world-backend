@@ -69,7 +69,7 @@ class BlogController {
             const files = req.files;
 
             const deletedImages = JSON.parse(req.body.deletedImages || '[]');
-
+            
             if (!id) {
                 return res.status(400).json({ message: 'ID новости не указан' });
             }
@@ -93,7 +93,6 @@ class BlogController {
             if (!existingBlog) {
                 return res.status(404).json({ message: 'Блог не найден' });
             }
-
 
             //Фильтрация оставшихся изображений после удаления
             const updatedPhotos = existingBlog.photos.filter((photo) => {
