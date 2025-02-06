@@ -7,7 +7,7 @@ class TimerController {
             const timer = await TimerModel.find()
 
             if(!timer || timer.length === 0) {
-                res.status(200).json({
+                return res.status(200).json({
                     message: 'Таймер не найден',
                 })
             }
@@ -98,4 +98,4 @@ class TimerController {
     }
 }
 
-module.exports = new TimerController()
+module.exports = new TimerController() 
