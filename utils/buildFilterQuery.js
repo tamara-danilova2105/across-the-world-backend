@@ -1,4 +1,3 @@
-
 module.exports.buildFilterQuery = ({filters}) => {
     const query = {};
 
