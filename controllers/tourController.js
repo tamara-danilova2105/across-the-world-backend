@@ -12,8 +12,6 @@ class TourController {
             const parsedFilter = filter ? JSON.parse(filter) : {}
             const filters = buildFilterQuery(parsedFilter)
 
-            console.log(sort, filter)
-
             const { limit , page } = req.params;
             const parsedLimit = parseInt(limit)
             const parsedPage = parseInt(page)

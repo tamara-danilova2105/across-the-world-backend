@@ -51,7 +51,7 @@ class BlogController {
             const photos = await Promise.all(files.map(async (file) => {
                 const optimizedSrc = await saveFile(file);
                 return { _id: crypto.randomUUID(), src: optimizedSrc };
-            }));
+            }))
 
             const newBlog = new NewsBlogModel({ title, description, photos });
             const savedBlog = await newBlog.save();
@@ -62,7 +62,7 @@ class BlogController {
         }
     }
 
-    async editBlog(req, res, next) {
+    async editBlog(req, res, next) { 
         try {
             const { id } = req.params;
             const { title, description } = req.body;

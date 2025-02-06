@@ -1,5 +1,4 @@
 module.exports.buildSortQuery = ({sortOption}) => {
-    console.log(sortOption)
     const sortMap = {
         new: { createdAt: -1 }, 
         soon: { date_start: 1 },       
