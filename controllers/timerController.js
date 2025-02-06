@@ -18,50 +18,6 @@ class TimerController {
         }
     }
 
-    // async addNewTimer(req, res, next) {
-    //     try{
-    //         const uniqueTimer = await TimerModel.findOne()
-
-    //         if (uniqueTimer) {
-    //             return res.status(409).json({
-    //                 message: 'Таймер уже существует.'
-    //             })
-    //         }
-    //         const {
-    //             title, description,
-    //             region,timer,
-    //             imagesWithDetails } = req.body 
-
-    //             const file = req.file
-
-    //             const images = [];
-
-    //             if (file) {
-    //                 const optimizedSrc = await saveFile(file);
-    //                 images.push({ _id: crypto.randomUUID(), src: optimizedSrc });
-    //             }
-
-    //             console.log(images) 
-
-    //         const newTimer = new TimerModel({
-    //             title,
-    //             description,
-    //             region,
-    //             timer,
-    //             imagesWithDetails: [{
-    //                 images,
-    //                 details: imagesWithDetails.details,
-    //             }],
-    //         });
-
-    //         const addNewTimer = await newTimer.save()
-
-    //         res.status(200).json({message:'Таймер добавлен', addNewTimer})
-    //     } catch(e) {
-    //         next(e)
-    //     }
-    // }
-
     async addNewTimer(req, res, next) {
         try {
             const uniqueTimer = await TimerModel.findOne();
@@ -72,37 +28,37 @@ class TimerController {
             }
     
             const { title, description, region, timer, imagesWithDetails } = req.body;
-            const files = req.file;
+            const files = req.files;
 
-            console.log(req.file, req.files)
+            const parsedImagesWithDetails = JSON.parse(imagesWithDetails);
     
-            // const photos = await Promise.all(files.map(async (file) => {
-            //     const optimizedSrc = await saveFile(file);
-            //     return { _id: crypto.randomUUID(), src: optimizedSrc };
-            // }));
+            const photos = await Promise.all(files.map(async (file) => {
+                const optimizedSrc = await saveFile(file);
+                return { _id: crypto.randomUUID(), src: optimizedSrc };
+            }))
     
-            // const imagesWithDetail = imagesWithDetails.map((detail, index) => ({
-            //     _id: photos[index]._id,
-            //     src: photos[index].src,
-            //     header: detail.header,
-            //     category: detail.category,
-            //     describe: detail.describe
-            // }));
+            const imagesWithDetail = parsedImagesWithDetails.map((detail, index) => ({
+                _id: photos[index]._id,
+                src: photos[index].src,
+                header: detail.header,
+                category: detail.category,
+                describe: detail.describe 
+            }));
     
-            // const newTimer = new TimerModel({
-            //     title,
-            //     description,
-            //     region,
-            //     timer,
-            //     imagesWithDetail
-            // });
+            const newTimer = new TimerModel({
+                title,
+                description,
+                region,
+                timer,
+                imagesWithDetail
+            });
     
-            // const savedTimer = await newTimer.save();
+            const savedTimer = await newTimer.save();
     
-            // res.status(200).json({ 
-            //     message: 'Таймер добавлен', 
-            //     timer: savedTimer 
-            // });
+            res.status(200).json({ 
+                message: 'Таймер добавлен', 
+                timer: savedTimer 
+            })
         } catch (e) {
             next(e)
         }

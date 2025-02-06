@@ -62,7 +62,7 @@ class BlogController {
         }
     }
 
-    async editBlog(req, res, next) {
+    async editBlog(req, res, next) { 
         try {
             const { id } = req.params;
             const { title, description } = req.body;

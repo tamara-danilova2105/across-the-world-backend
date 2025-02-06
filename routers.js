@@ -45,6 +45,7 @@ const {
 } = require('./controllers/timerController');
 
 const createStorage = require('./middleware/uploadMiddleware');
+const { sendMessage } = require('./controllers/subscribeController');
 const uploadNews = createStorage('uploads/news');
 
 router.post('/registration',
@@ -100,9 +101,11 @@ router.put('/reviews/:id', moderateReview)
 router.delete('/reviews/:id', deleteReview)
 
 router.get('/timer', getTimer)
-router.post('/timer', uploadNews.array('imagesWithDetails', 2), addNewTimer)
+router.post('/timer', uploadNews.array('photos', 2), addNewTimer)
 router.put('/timer', editTimer)
 router.delete('/timer', deleteTimer)
+
+router.post('/subscribe', sendMessage)
 
 router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))
