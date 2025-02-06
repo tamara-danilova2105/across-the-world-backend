@@ -85,6 +85,7 @@ const tourSchema = new mongoose.Schema(
         program: { type: [dayProgramSchema], default: [] },
         hotels: { type: [imageSchema], default: [] },
         mapMarker: { type: [mapMarkerSchema], default: [] },
+        isPublished: { type: Boolean, default: true },
     },
     {
         timestamps: true,

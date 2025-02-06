@@ -16,7 +16,8 @@ const {
     getTourById,
     addTour,
     editTour,
-    deleteTour
+    deleteTour,
+    updateTourDetails
 } = require('./controllers/tourController');
 const {
     getAllBlogs,
@@ -78,11 +79,12 @@ router.put('/refresh-password',
 )
 router.put('/refresh', refresh)
 
-router.get('/tours/:limit/:page', getAllTours)
-router.get('/tours/:id', getTourById)
-router.post('/tours', addTour)
-router.put('/tours/:id', editTour)
-router.delete('/tours/:id', deleteTour)
+router.get('/tours/:limit/:page', getAllTours);
+router.get('/tours/:id', getTourById);
+router.post('/tours', addTour);
+router.put('/tours/:id', editTour);
+router.patch("tours/:id", updateTourDetails);
+router.delete('/tours/:id', deleteTour);
 
 router.get('/news', getAllBlogs);
 router.get('/news/:id', getBlog);
