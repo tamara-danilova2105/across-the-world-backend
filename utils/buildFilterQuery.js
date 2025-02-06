@@ -24,13 +24,6 @@ module.exports.buildFilterQuery = ({filters}) => {
         }
     }
 
-    if (filters.season) {
-        const seasons = Object.keys(filters.season).filter(key => filters.season[key])
-        if (seasons.length > 0) {
-            query["season.value"] = { $in: seasons }
-        }
-    }
-
     if (filters.price && Array.isArray(filters.price)) {
         const [minPrice, maxPrice] = filters.price;
         if (minPrice !== undefined && maxPrice !== undefined) {

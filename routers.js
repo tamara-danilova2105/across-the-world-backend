@@ -100,9 +100,9 @@ router.put('/reviews/:id', moderateReview)
 router.delete('/reviews/:id', deleteReview)
 
 router.get('/timer', getTimer)
-router.post('/timer', addNewTimer)
-router.put('/timer/:id', editTimer)
-router.delete('/timer/:id', deleteTimer)
+router.post('/timer', uploadNews.array('imagesWithDetails', 2), addNewTimer)
+router.put('/timer', editTimer)
+router.delete('/timer', deleteTimer)
 
 router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))

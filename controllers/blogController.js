@@ -49,7 +49,7 @@ class BlogController {
             const photos = await Promise.all(files.map(async (file) => {
                 const optimizedSrc = await saveFile(file);
                 return { _id: crypto.randomUUID(), src: optimizedSrc };
-            }));
+            }))
 
             const newBlog = new NewsBlogModel({ title, description, photos });
             const savedBlog = await newBlog.save();
