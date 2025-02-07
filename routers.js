@@ -79,11 +79,11 @@ router.put('/refresh-password',
 )
 router.put('/refresh', refresh)
 
-router.get('/tours/:limit/:page', getAllTours);
+router.get('/tours', getAllTours);
 router.get('/tours/:id', getTourById);
 router.post('/tours', addTour);
 router.put('/tours/:id', editTour);
-router.patch("tours/:id", updateTourDetails);
+router.patch('/tours/:id', updateTourDetails);
 router.delete('/tours/:id', deleteTour);
 
 router.get('/news', getAllBlogs);

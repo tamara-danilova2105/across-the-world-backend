@@ -28,8 +28,8 @@ const discountSchema = new mongoose.Schema({
 });
 
 const imageSchema = new mongoose.Schema({
+    _id: { type: String, required: true },
     src: { type: String, required: true },
-    alt: { type: String, required: true },
 });
 
 const dayProgramSchema = new mongoose.Schema({
@@ -65,7 +65,7 @@ const tourSchema = new mongoose.Schema(
         details: { type: detailsSchema, required: true },
         imageCover: { type: [imageSchema], required: true },
         direction: {
-            type: [String],
+            type: String,
             enum: ['Россия', 'Заграница'],
             required: true,
         },
