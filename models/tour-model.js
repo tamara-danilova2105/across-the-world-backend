@@ -6,7 +6,6 @@ const priceSchema = new mongoose.Schema({
 });
 
 const dateTourSchema = new mongoose.Schema({
-    _id: { type: String, required: true},
     date_start: { type: Date, required: true },
     date_finish: { type: Date, required: true },
     price: { type: priceSchema, required: true },
@@ -29,7 +28,6 @@ const discountSchema = new mongoose.Schema({
 });
 
 const imageSchema = new mongoose.Schema({
-    _id: { type: String, required: true},
     src: { type: String, required: true },
     alt: { type: String, required: true },
 });
