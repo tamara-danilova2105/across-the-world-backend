@@ -16,7 +16,8 @@ const {
     getTourById,
     addTour,
     editTour,
-    deleteTour
+    deleteTour,
+    updateTourDetails
 } = require('./controllers/tourController');
 const {
     getAllBlogs,
@@ -45,7 +46,6 @@ const {
 } = require('./controllers/timerController');
 
 const createStorage = require('./middleware/uploadMiddleware');
-const { sendMessage } = require('./controllers/subscribeController');
 const uploadNews = createStorage('uploads/news');
 
 router.post('/registration',
@@ -79,11 +79,12 @@ router.put('/refresh-password',
 )
 router.put('/refresh', refresh)
 
-router.get('/tours/:limit/:page', getAllTours)
-router.get('/tours/:id', getTourById)
-router.post('/tours', addTour)
-router.put('/tours/:id', editTour)
-router.delete('/tours/:id', deleteTour)
+router.get('/tours/:limit/:page', getAllTours);
+router.get('/tours/:id', getTourById);
+router.post('/tours', addTour);
+router.put('/tours/:id', editTour);
+router.patch("tours/:id", updateTourDetails);
+router.delete('/tours/:id', deleteTour);
 
 router.get('/news', getAllBlogs);
 router.get('/news/:id', getBlog);
@@ -101,11 +102,9 @@ router.put('/reviews/:id', moderateReview)
 router.delete('/reviews/:id', deleteReview)
 
 router.get('/timer', getTimer)
-router.post('/timer', uploadNews.array('photos', 2), addNewTimer)
-router.put('/timer', editTimer)
-router.delete('/timer', deleteTimer)
-
-router.post('/subscribe', sendMessage)
+router.post('/timer', addNewTimer)
+router.put('/timer/:id', editTimer)
+router.delete('/timer/:id', deleteTimer)
 
 router.use('/api', swaggerUi.serve);
 router.get('/api', swaggerUi.setup(swaggerDocument))
