@@ -13,8 +13,6 @@ class TourController {
             const parsedFilter = filter ? JSON.parse(filter) : {};
             const filters = buildFilterQuery(parsedFilter);
 
-            console.log(sort, filter);
-
             const parsedLimit = parseInt(limit, 10) || 10;
             const parsedPage = parseInt(page, 10) || 1;
 
@@ -27,10 +25,6 @@ class TourController {
                 .sort(sorting)
                 .skip((parsedPage - 1) * parsedLimit)
                 .limit(parsedLimit);
-
-            if (tours.length === 0) {
-                return res.status(404).json({ message: "Туры не найдены" });
-            }
 
             const allTours = await tourModel.countDocuments(filters);
 
@@ -60,45 +54,16 @@ class TourController {
 
     async addTour(req, res, next) {
         try {
-            const {
-                tour,
-                dates,
-                locations,
-                details,
-                image,
-                direction,
-                region,
-                country,
-                discount,
-                activity,
-                comfort,
-                description,
-                program,
-                hotels,
-                isPublished,
-            } = req.body
+            // Убираем undefined, чтобы не сохранять пустые значения
+            const cleanedData = JSON.parse(JSON.stringify(req.body));
 
-            const newTour = new tourModel({
-                tour,
-                dates,
-                locations,
-                details,
-                image,
-                direction,
-                region,
-                country,
-                discount,
-                activity,
-                comfort,
-                description,
-                program,
-                hotels,
-                isPublished,
-            })
-            const savedTour = await newTour.save()
-            res.status(200).json(savedTour)
+            const newTour = new tourModel(cleanedData);
+            const savedTour = await newTour.save();
+
+            res.status(200).json(savedTour);
         } catch (error) {
-            next(error)
+            console.error("Ошибка при сохранении тура:", error);
+            next(error);
         }
     }
 

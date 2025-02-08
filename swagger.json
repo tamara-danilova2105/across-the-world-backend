@@ -1,224 +1,394 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "FURNITURE-STORE API Documentation",
-        "description": "FURNITURE-STORE API",
+        "title": "Accross The World API Documentation",
+        "description": "API для управления проектом Accross The World",
         "version": "1.0",
         "host": "localhost:8000"
     },
     "tags": [
         {
-            "name": "Registration"
+            "name": "Regions",
+            "description": "Управление регионами"
+        },
+        {
+            "name": "Reviews",
+            "description": "Управление отзывами"
+        },
+        {
+            "name": "Blogs",
+            "description": "Управление блогами"
+        },
+        {
+            "name": "Tours",
+            "description": "Управление турами"
         }
     ],
     "paths": {
-        "/registration": {
-            "post": {
-                "tags": ["Registration"],
-                "description": "Регистрация новых пользователей",
+        "/tours": {
+            "get": {
+                "tags": [
+                    "Tours"
+                ],
+                "description": "Получение списка туров с фильтрацией и сортировкой",
                 "parameters": [
                     {
-                        "name": "Registration",
-                        "in": "body",
-                        "required": "true",
-                        "schema" : {
-                            "$ref" : "#definitions/AuthAdmin"
-                        }
+                        "name": "sort",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "description": "Сортировка (JSON)"
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "description": "Фильтрация (JSON)"
+                    },
+                    {
+                        "name": "admin",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "default": "false",
+                        "description": "Фильтр для отображения всех туров (true - все, false - только опубликованные)"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Количество туров на странице"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Номер страницы"
                     }
-                ],
-                "produces": [
-                    "application/json"
                 ],
                 "responses": {
                     "200": {
-                        "description": "Пользователь зарегистрирован",
+                        "description": "Список туров",
                         "schema": {
-                            "$ref": "#definitions/AuthAdmin"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Tour"
+                            }
                         }
-                    },
-                    "400": {
-                        "description": "Ошибка регистрации"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Tours"
+                ],
+                "description": "Добавление нового тура",
+                "parameters": [
+                    {
+                        "name": "TourData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Tour"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Тур успешно добавлен",
+                        "schema": {
+                            "$ref": "#/definitions/Tour"
+                        }
                     }
                 }
             }
         },
-        "/login": {
-            "post": {
-                "tags": ["Registration"],
-                "description": "Вход пользователя в аккаунт",
+        "/tours/{id}": {
+            "get": {
+                "tags": [
+                    "Tours"
+                ],
+                "description": "Получение конкретного тура",
                 "parameters": [
                     {
-                        "name": "Login",
-                        "in": "body",
-                        "required": "true",
-                        "schema" : {
-                            "$ref" : "#definitions/LoginAdmin"
-                        }
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "ID тура"
                     }
-                ],
-                "produces": [
-                    "application/json"
                 ],
                 "responses": {
                     "200": {
-                        "description": "Успешный вход",
+                        "description": "Данные тура",
                         "schema": {
-                            "$ref": "#definitions/LoginAdmin"
+                            "$ref": "#/definitions/Tour"
                         }
-                    },
-                    "400": {
-                        "description": "Неверный логин или пароль"
                     },
                     "404": {
-                        "description": "Профиль пользователя не найден"
+                        "description": "Тур не найден"
                     }
                 }
-            }
-        },
-        "/reset-password": {
-            "post": {
-                "tags": ["Registration"],
-                "description": "Сброс пароля для смены",
-                "parameters": [
-                    {
-                        "name": "Reset",
-                        "in": "body",
-                        "required": "true",
-                        "schema" : {
-                            "$ref" : "#definitions/ResetAdmin"
-                        }
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Успещный сброс пароля",
-                        "schema": {
-                            "$ref": "#definitions/ResetAdmin"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный пароль"
-                    },
-                    "404": {
-                        "description": "Профиль админ не найден"
-                    }
-                }
-            }
-        },
-        "/refresh-password": {
+            },
             "put": {
-                "tags": ["Registration"],
-                "description": "Изменение пароля и сохранение нового в базе данных.",
+                "tags": [
+                    "Tours"
+                ],
+                "description": "Редактирование тура",
                 "parameters": [
                     {
-                        "name": "Refresh",
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "ID тура"
+                    },
+                    {
+                        "name": "TourData",
                         "in": "body",
-                        "required": "true",
-                        "schema" : {
-                            "$ref" : "#definitions/RefreshAdmin"
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Tour"
                         }
                     }
                 ],
-                "produces": [
-                    "application/json"
+                "responses": {
+                    "200": {
+                        "description": "Тур успешно обновлен",
+                        "schema": {
+                            "$ref": "#/definitions/Tour"
+                        }
+                    },
+                    "404": {
+                        "description": "Тур не найден"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Tours"
+                ],
+                "description": "Удаление тура",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "ID тура"
+                    }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Пароль успешно изменен",
-                        "schema": {
-                            "$ref": "#definitions/RefreshAdmin"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный или недействительный токен"
+                        "description": "Тур успешно удален"
                     },
                     "404": {
-                        "description": "Профиль пользователя не найден"
+                        "description": "Тур не найден"
                     }
                 }
             }
         },
-        "/logout": {
-            "delete": {
-                "tags": ["Registration"],
-                "description": "Выход из системы",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "Успешный выход",
+        "/tours/{id}/details": {
+            "patch": {
+                "tags": [
+                    "Tours"
+                ],
+                "description": "Обновление деталей тура (даты, статус публикации)",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string",
+                        "description": "ID тура"
+                    },
+                    {
+                        "name": "TourDetails",
+                        "in": "body",
+                        "required": true,
                         "schema": {
                             "type": "object",
                             "properties": {
-                                "message": {
-                                    "type": "string"
+                                "dates": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "isPublished": {
+                                    "type": "boolean"
                                 }
                             }
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Детали тура успешно обновлены",
+                        "schema": {
+                            "$ref": "#/definitions/Tour"
+                        }
                     },
-                    "400": {
-                        "description": "Ошибка выхода"
+                    "404": {
+                        "description": "Тур не найден"
                     }
                 }
             }
         }
     },
     "definitions": {
-        "AuthAdmin" : {
+        "Region": {
             "required": [
-                "login", 
-                "password", 
-                "email"
+                "direction",
+                "region"
             ],
             "properties": {
-                "login": {
-                    "type": "string"
+                "direction": {
+                    "type": "string",
+                    "enum": [
+                        "Россия",
+                        "Заграница"
+                    ],
+                    "description": "Направление региона"
                 },
-                "password": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
+                "region": {
+                    "type": "string",
+                    "description": "Название региона"
                 }
             }
         },
-        "LoginAdmin" : {
+        "Review": {
             "required": [
-                "login", 
-                "password"
+                "name",
+                "city",
+                "feedback",
+                "tourId"
             ],
             "properties": {
-                "login": {
+                "name": {
                     "type": "string"
                 },
-                "password": {
+                "city": {
                     "type": "string"
+                },
+                "feedback": {
+                    "type": "string"
+                },
+                "tourId": {
+                    "type": "string"
+                },
+                "isModeration": {
+                    "type": "boolean"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
                 }
             }
         },
-        "ResetAdmin" : {
+        "Blog": {
             "required": [
-                "email"
+                "title",
+                "description"
             ],
             "properties": {
-                "email": {
-                    "type":"string"
+                "title": {
+                    "type": "string",
+                    "description": "Заголовок блога"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Описание блога"
+                },
+                "photos": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "_id": {
+                                "type": "string"
+                            },
+                            "src": {
+                                "type": "string",
+                                "description": "URL изображения"
+                            }
+                        }
+                    }
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
                 }
             }
         },
-        "RefreshAdmin" : {
+        "Tour": {
             "required": [
-                "resetToken", 
-                "newPassword"
+                "tour",
+                "dates",
+                "locations",
+                "details",
+                "image",
+                "direction",
+                "region",
+                "country",
+                "description",
+                "program"
             ],
             "properties": {
-                "resetToken": {
-                    "type": "string"
+                "tour": {
+                    "type": "string",
+                    "description": "Название тура"
                 },
-                "newPassword": {
-                    "type": "string"
+                "dates": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Даты проведения тура"
+                },
+                "locations": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Локации тура"
+                },
+                "details": {
+                    "type": "object",
+                    "description": "Детали тура"
+                },
+                "image": {
+                    "type": "string",
+                    "description": "Ссылка на изображение"
+                },
+                "direction": {
+                    "type": "string",
+                    "description": "Направление"
+                },
+                "region": {
+                    "type": "string",
+                    "description": "Регион"
+                },
+                "country": {
+                    "type": "string",
+                    "description": "Страна"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Описание тура"
+                },
+                "program": {
+                    "type": "string",
+                    "description": "Программа тура"
+                },
+                "isPublished": {
+                    "type": "boolean",
+                    "description": "Опубликован ли тур"
                 }
             }
         }
