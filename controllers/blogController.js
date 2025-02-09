@@ -125,7 +125,6 @@ class BlogController {
                 return res.status(404).json({ message: 'Блог не найден' });
             }
 
-            // Удаление связанных изображений
             if (deletedBlog.photos && deletedBlog.photos.length > 0) {
                 deletedBlog.photos.forEach(({ src }) => {
                     const fullPath = path.join(__dirname, '..', src);

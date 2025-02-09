@@ -1,7 +1,5 @@
 const express = require('express');
 const { body } = require('express-validator');
-const swaggerUi = require('swagger-ui-express')
-const swaggerDocument = require('./swagger.json')
 const router = express.Router()
 const {
     registration,
@@ -17,7 +15,8 @@ const {
     addTour,
     editTour,
     deleteTour,
-    updateTourDetails
+    updateTourDetails,
+    uploadFiles
 } = require('./controllers/tourController');
 const {
     getAllBlogs,
@@ -46,7 +45,9 @@ const {
 } = require('./controllers/timerController');
 
 const createStorage = require('./middleware/uploadMiddleware');
+const multer = require('multer');
 const uploadNews = createStorage('uploads/news');
+const upload = multer();
 
 router.post('/registration',
     [
@@ -82,6 +83,7 @@ router.put('/refresh', refresh)
 router.get('/tours', getAllTours);
 router.get('/tours/:id', getTourById);
 router.post('/tours', addTour);
+router.post('/upload', upload.array('files'), uploadFiles);
 router.put('/tours/:id', editTour);
 router.patch('/tours/:id', updateTourDetails);
 router.delete('/tours/:id', deleteTour);
@@ -105,17 +107,5 @@ router.get('/timer', getTimer)
 router.post('/timer', addNewTimer)
 router.put('/timer/:id', editTimer)
 router.delete('/timer/:id', deleteTimer)
-
-router.use('/api', swaggerUi.serve);
-router.get('/api', swaggerUi.setup(swaggerDocument))
-
-// Конфигурация для разных типов загрузок
-
-
-//другие примеры:
-// const uploadProducts = createStorage('uploads/products');
-// const uploadProfiles = createStorage('uploads/profiles');
-// пример для обновления одного изображение
-// router.post('/profile', uploadProfiles.single('avatar'), updateProfile);
 
 module.exports = router

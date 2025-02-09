@@ -1,6 +1,28 @@
-const tourModel = require('../models/tour-model')
-const { buildFilterQuery } = require('../utils/buildFilterQuery')
-const { buildSortQuery } = require('../utils/buildSortQuery')
+const tourModel = require('../models/tour-model');
+const { buildFilterQuery } = require('../utils/buildFilterQuery');
+const { buildSortQuery } = require('../utils/buildSortQuery');
+const path = require('path');
+const fs = require('fs');
+const sharp = require('sharp');
+const { promisify } = require('util');
+
+const unlinkAsync = promisify(fs.unlink);
+
+const deleteFiles = async (images) => {
+    if (!images || images.length === 0) return;
+
+    await Promise.all(
+        images.map(async (image) => {
+            const imagePath = path.join(__dirname, '..', image.src);
+            try {
+                await unlinkAsync(imagePath);
+                console.log(`Удален файл: ${imagePath}`);
+            } catch (err) {
+                console.error(`Ошибка удаления файла ${imagePath}:`, err.message);
+            }
+        })
+    );
+};
 
 class TourController {
     async getAllTours(req, res, next) {
@@ -110,12 +132,57 @@ class TourController {
     async deleteTour(req, res, next) {
         try {
             const { id } = req.params;
-            const deletedTour = await tourModel.findByIdAndDelete(id)
-            if (!deletedTour) {
-                return res.status(404).json({ message: 'Тур не найден' })
+            const tour = await tourModel.findById(id);
+
+            if (!tour) {
+                return res.status(404).json({ message: 'Тур не найден' });
             }
-            res.status(200).json({ message: 'Тур успешно удалён' })
+
+            // Удаляем файлы с сервера
+            await deleteFiles(tour.imageCover);
+            await deleteFiles(tour.hotels);
+
+            // Удаление изображений из program[].images
+            for (const programItem of tour.program) {
+                await deleteFiles(programItem.images);
+            }
+
+            // Удаляем сам тур из базы
+            await tourModel.findByIdAndDelete(id);
+
+            res.status(200).json({ message: 'Тур и его изображения успешно удалены' });
         } catch (error) {
+            next(error);
+        }
+    }
+
+    async uploadFiles(req, res, next) {
+        try {
+            if (!req.files || req.files.length === 0) {
+                return res.status(400).json({ message: 'Нет загруженных файлов' });
+            }
+
+            const uploadDir = path.join(__dirname, '../uploads');
+
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+
+            const filePromises = req.files.map(async (file) => {
+                const fileId = path.parse(file.originalname).name;
+                const filePath = path.join(uploadDir, `${fileId}.webp`)
+
+                await sharp(file.buffer)
+                    .webp({ quality: 75 })
+                    .toFile(filePath);
+
+                return { src: `/uploads/${fileId}.webp` };
+            });
+
+            const uploadedFiles = await Promise.all(filePromises);
+            res.status(200).json({ message: 'Файлы загружены и сжаты', files: uploadedFiles });
+        } catch (error) {
+            console.error("Ошибка загрузки файлов:", error);
             next(error);
         }
     }
