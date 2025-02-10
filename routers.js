@@ -47,6 +47,7 @@ const {
 const createStorage = require('./middleware/uploadMiddleware');
 const multer = require('multer');
 const { sendMessage } = require('./controllers/subscribeController');
+const { getAllFAQs, updateFAQs } = require('./controllers/FAQController');
 const uploadNews = createStorage('uploads/news');
 const upload = multer();
 
@@ -110,5 +111,8 @@ router.put('/timer', editTimer)
 router.delete('/timer', deleteTimer)
 
 router.post('/subscribe', sendMessage)
+
+router.get("/faqs", getAllFAQs);
+router.put("/faqs", updateFAQs);
 
 module.exports = router

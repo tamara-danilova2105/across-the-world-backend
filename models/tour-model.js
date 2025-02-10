@@ -52,6 +52,12 @@ const mapMarkerSchema = new mongoose.Schema({
     },
 });
 
+const faqSchema = new mongoose.Schema({
+    question: { type: String, required: true },
+    answer: { type: String, required: true },
+});
+
+
 const tourSchema = new mongoose.Schema(
     {
         types: {
@@ -85,6 +91,8 @@ const tourSchema = new mongoose.Schema(
         program: { type: [dayProgramSchema], default: [] },
         hotels: { type: [imageSchema], default: [] },
         mapMarker: { type: [mapMarkerSchema], default: [] },
+        mustKnow: { type: [faqSchema], default: [] },
+        isPublished: { type: Boolean, default: true },
     },
     {
         timestamps: true,
