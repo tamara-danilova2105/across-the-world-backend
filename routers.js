@@ -46,6 +46,7 @@ const {
 
 const createStorage = require('./middleware/uploadMiddleware');
 const multer = require('multer');
+const { sendMessage } = require('./controllers/subscribeController');
 const uploadNews = createStorage('uploads/news');
 const upload = multer();
 
@@ -104,8 +105,10 @@ router.put('/reviews/:id', moderateReview)
 router.delete('/reviews/:id', deleteReview)
 
 router.get('/timer', getTimer)
-router.post('/timer', addNewTimer)
-router.put('/timer/:id', editTimer)
-router.delete('/timer/:id', deleteTimer)
+router.post('/timer', uploadNews.array('photos', 2), addNewTimer)
+router.put('/timer', editTimer)
+router.delete('/timer', deleteTimer)
+
+router.post('/subscribe', sendMessage)
 
 module.exports = router

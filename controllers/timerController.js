@@ -1,4 +1,5 @@
 const TimerModel = require('../models/timer-model')
+const { saveFile } = require('../services/uploadService')
 
 class TimerController {
     async getTimer(req, res, next) {
@@ -6,7 +7,7 @@ class TimerController {
             const timer = await TimerModel.find()
 
             if(!timer || timer.length === 0) {
-                return res.status(200).json({
+                res.status(200).json({
                     message: 'Таймер не найден',
                 })
             }
@@ -18,39 +19,55 @@ class TimerController {
     }
 
     async addNewTimer(req, res, next) {
-        console.log(req.body, req.files)
-        try{
-            const {
-                title,
-                description,
-                timer,
-                images } = req.body 
+        try {
+            const uniqueTimer = await TimerModel.findOne();
+            if (uniqueTimer) {
+                return res.status(409).json({
+                    message: 'Таймер уже существует.'
+                });
+            }
+    
+            const { title, description, region, timer, imagesWithDetails } = req.body;
+            const files = req.files;
 
+            const parsedImagesWithDetails = JSON.parse(imagesWithDetails);
+    
+            const photos = await Promise.all(files.map(async (file) => {
+                const optimizedSrc = await saveFile(file);
+                return { _id: crypto.randomUUID(), src: optimizedSrc };
+            }))
+    
+            const imagesWithDetail = parsedImagesWithDetails.map((detail, index) => ({
+                _id: photos[index]._id,
+                src: photos[index].src,
+                header: detail.header,
+                category: detail.category,
+                describe: detail.describe 
+            }));
+    
             const newTimer = new TimerModel({
                 title,
                 description,
+                region,
                 timer,
-                images
+                imagesWithDetail
+            });
+    
+            const savedTimer = await newTimer.save();
+    
+            res.status(200).json({ 
+                message: 'Таймер добавлен', 
+                timer: savedTimer 
             })
-
-            const addNewTimer = await newTimer.save()
-
-            res.status(200).json({message:'Таймер добавлен', addNewTimer})
-        } catch(e) {
+        } catch (e) {
             next(e)
         }
     }
 
     async editTimer(req, res, next) {
         try{
-            const {id} = req.params
-
-            if (!id) {
-                return res.status(400).json({ message: 'id не указан' })
-            }
-
             const updatedTimer = await TimerModel.findByIdAndUpdate(
-                id, req.body,
+                req.body,
                 { new: true })
             
             if(!updatedTimer) {
@@ -67,27 +84,18 @@ class TimerController {
     }
 
     async deleteTimer(req, res, next) {
-        try{
-            const { id } = req.params
+        try {
+            const deletedTimer = await TimerModel.findOneAndDelete()
 
-            if (!id) {
-                res.status(400).json({ message: 'id не указан' })
+            if (!deletedTimer) {
+                return res.status(404).json({ message: 'Таймер не найден' })
             }
 
-            const deletedTimer = await TimerModel.findByIdAndDelete(id)
-
-            if(!deletedTimer) {
-                res.status(404).json({ message: 'Таймер не найден' })
-            }
-
-            res.status(200).json({
-                message: 'Таймер удален',
-                deletedTimer
-            })
-        } catch(e) {
+            res.status(200).json({ message: 'Таймер удалён', deletedTimer })
+        } catch (e) {
             next(e)
         }
     }
 }
 
-module.exports = new TimerController() 
+module.exports = new TimerController()
