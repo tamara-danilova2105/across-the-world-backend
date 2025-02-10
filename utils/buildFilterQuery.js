@@ -1,3 +1,4 @@
+
 module.exports.buildFilterQuery = ({filters}) => {
     const query = {};
 
@@ -13,20 +14,16 @@ module.exports.buildFilterQuery = ({filters}) => {
     }
 
     if (filters.region) {
-        const regions = Object.keys(filters.region.regions).filter(key => filters.region.regions[key])
-        const countries = Object.keys(filters.region.country).filter(key => filters.region.country[key])
-        if (regions.length > 0 || countries.length > 0) {
-            query.$or = [
-                { "region.regions.value": { $in: regions } },
-                { "region.country.value": { $in: countries } }
-            ];
+        const regions = Object.keys(filters.region).filter(key => filters.region[key])
+        if (regions.length > 0) {
+            query["region"] = { $in: regions } 
         }
     }
 
-    if (filters.season) {
-        const seasons = Object.keys(filters.season).filter(key => filters.season[key])
-        if (seasons.length > 0) {
-            query["season.value"] = { $in: seasons }
+    if (filters.date) {
+        const dates = Object.keys(filters.date).filter(key => filters.date[key])
+        if (dates.length > 0) {
+            query["date"] = { $in: dates }
         }
     }
 

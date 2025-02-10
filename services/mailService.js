@@ -26,6 +26,24 @@ class MailService {
             html: resetPasswordTemplate(resetToken)
         })
     }
+
+    async sendUserEmail(email) {
+        await this.transporter.sendMail({
+            from: process.env.SMTP_ADMIN,
+            to: email,
+            subject: `Подписка на новости`,
+            html: userTemplate(email)
+        })
+    }
+
+    async sendAdminEmail(email) {
+        await this.transporter.sendMail({
+            from: process.env.SMTP_ADMIN,
+            to: process.env.SMTP_ADMIN,
+            subject: `Новый подписчик`,
+            html: adminTemplate(email)
+        })
+    }
 }
 
 module.exports = new MailService()
