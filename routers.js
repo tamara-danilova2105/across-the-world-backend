@@ -1,7 +1,5 @@
 const express = require('express');
 const { body } = require('express-validator');
-const swaggerUi = require('swagger-ui-express')
-const swaggerDocument = require('./swagger.json')
 const router = express.Router()
 const {
     registration,
@@ -16,7 +14,9 @@ const {
     getTourById,
     addTour,
     editTour,
-    deleteTour
+    deleteTour,
+    updateTourDetails,
+    uploadFiles
 } = require('./controllers/tourController');
 const {
     getAllBlogs,
@@ -45,8 +45,9 @@ const {
 } = require('./controllers/timerController');
 
 const createStorage = require('./middleware/uploadMiddleware');
-const { sendMessage } = require('./controllers/subscribeController');
+const multer = require('multer');
 const uploadNews = createStorage('uploads/news');
+const upload = multer();
 
 router.post('/registration',
     [
@@ -79,11 +80,13 @@ router.put('/refresh-password',
 )
 router.put('/refresh', refresh)
 
-router.get('/tours/:limit/:page', getAllTours)
-router.get('/tours/:id', getTourById)
-router.post('/tours', addTour)
-router.put('/tours/:id', editTour)
-router.delete('/tours/:id', deleteTour)
+router.get('/tours', getAllTours);
+router.get('/tours/:id', getTourById);
+router.post('/tours', addTour);
+router.post('/upload', upload.array('files'), uploadFiles);
+router.put('/tours/:id', editTour);
+router.patch('/tours/:id', updateTourDetails);
+router.delete('/tours/:id', deleteTour);
 
 router.get('/news', getAllBlogs);
 router.get('/news/:id', getBlog);
@@ -101,22 +104,8 @@ router.put('/reviews/:id', moderateReview)
 router.delete('/reviews/:id', deleteReview)
 
 router.get('/timer', getTimer)
-router.post('/timer', uploadNews.array('photos', 2), addNewTimer)
-router.put('/timer', editTimer)
-router.delete('/timer', deleteTimer)
-
-router.post('/subscribe', sendMessage)
-
-router.use('/api', swaggerUi.serve);
-router.get('/api', swaggerUi.setup(swaggerDocument))
-
-// Конфигурация для разных типов загрузок
-
-
-//другие примеры:
-// const uploadProducts = createStorage('uploads/products');
-// const uploadProfiles = createStorage('uploads/profiles');
-// пример для обновления одного изображение
-// router.post('/profile', uploadProfiles.single('avatar'), updateProfile);
+router.post('/timer', addNewTimer)
+router.put('/timer/:id', editTimer)
+router.delete('/timer/:id', deleteTimer)
 
 module.exports = router

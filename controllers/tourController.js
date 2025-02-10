@@ -1,40 +1,63 @@
-const tourModel = require('../models/tour-model')
-const { buildFilterQuery } = require('../utils/buildFilterQuery')
-const { buildSortQuery } = require('../utils/buildSortQuery')
+const tourModel = require('../models/tour-model');
+const { buildFilterQuery } = require('../utils/buildFilterQuery');
+const { buildSortQuery } = require('../utils/buildSortQuery');
+const path = require('path');
+const fs = require('fs');
+const sharp = require('sharp');
+const { promisify } = require('util');
+
+const unlinkAsync = promisify(fs.unlink);
+
+const deleteFiles = async (images) => {
+    if (!images || images.length === 0) return;
+
+    await Promise.all(
+        images.map(async (image) => {
+            const imagePath = path.join(__dirname, '..', image.src);
+            try {
+                await unlinkAsync(imagePath);
+                console.log(`Удален файл: ${imagePath}`);
+            } catch (err) {
+                console.error(`Ошибка удаления файла ${imagePath}:`, err.message);
+            }
+        })
+    );
+};
 
 class TourController {
     async getAllTours(req, res, next) {
         try {
-            const { sort, filter } = req.query;
-            const parsedSort = sort ? JSON.parse(sort) : {}
-            const sorting = buildSortQuery(parsedSort)
+            const { sort, filter, admin = "false", limit = "10", page = "1" } = req.query;
 
-            const parsedFilter = filter ? JSON.parse(filter) : {}
-            const filters = buildFilterQuery(parsedFilter)
+            const parsedSort = sort ? JSON.parse(sort) : {};
+            const sorting = buildSortQuery(parsedSort);
 
-            const { limit , page } = req.params;
-            const parsedLimit = parseInt(limit)
-            const parsedPage = parseInt(page)
+            const parsedFilter = filter ? JSON.parse(filter) : {};
+            const filters = buildFilterQuery(parsedFilter);
+
+            const parsedLimit = parseInt(limit, 10) || 10;
+            const parsedPage = parseInt(page, 10) || 1;
+
+            // Если `admin !== "true"`, фильтруем только опубликованные туры
+            if (admin !== "true") {
+                filters.isPublished = true;
+            }
 
             const tours = await tourModel.find(filters)
                 .sort(sorting)
                 .skip((parsedPage - 1) * parsedLimit)
-                .limit(Number(parsedLimit))
-            
-            if (tours.length === 0) {
-                return res.status(404).json({ message: 'Товары не найдены' });
-            }
-            
-            const allTours = await tourModel.countDocuments(filters)
+                .limit(parsedLimit);
+
+            const allTours = await tourModel.countDocuments(filters);
 
             res.status(200).json({
                 tours,
                 allTours,
-                currentPage: Number(parsedPage),
+                currentPage: parsedPage,
                 totalPages: Math.ceil(allTours / parsedLimit),
-            })
+            });
         } catch (error) {
-            next(error)
+            next(error);
         }
     }
 
@@ -53,43 +76,16 @@ class TourController {
 
     async addTour(req, res, next) {
         try {
-            const { 
-                tour, 
-                dates, 
-                locations, 
-                details, 
-                image, 
-                direction, 
-                region, 
-                country, 
-                discount, 
-                activity, 
-                comfort, 
-                description, 
-                program, 
-                hotels 
-            } = req.body
-            
-            const newTour = new tourModel({
-                tour,
-                dates,
-                locations,
-                details,
-                image,
-                direction,
-                region,
-                country,
-                discount,
-                activity,
-                comfort,
-                description,
-                program,
-                hotels
-            })
-            const savedTour = await newTour.save()
-            res.status(200).json(savedTour)
+            // Убираем undefined, чтобы не сохранять пустые значения
+            const cleanedData = JSON.parse(JSON.stringify(req.body));
+
+            const newTour = new tourModel(cleanedData);
+            const savedTour = await newTour.save();
+
+            res.status(200).json(savedTour);
         } catch (error) {
-            next(error)
+            console.error("Ошибка при сохранении тура:", error);
+            next(error);
         }
     }
 
@@ -108,18 +104,88 @@ class TourController {
         }
     }
 
+    async updateTourDetails(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { dates, isPublished } = req.body;
+
+            const updateFields = {};
+            if (dates) updateFields.dates = dates;
+            if (typeof isPublished === "boolean") updateFields.isPublished = isPublished;
+
+            const updatedTour = await tourModel.findByIdAndUpdate(
+                id,
+                { $set: updateFields },
+                { new: true }
+            );
+
+            if (!updatedTour) {
+                return res.status(404).json({ message: "Тур не найден" });
+            }
+
+            res.status(200).json(updatedTour);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async deleteTour(req, res, next) {
         try {
             const { id } = req.params;
-            const deletedTour = await tourModel.findByIdAndDelete(id)
-            if (!deletedTour) {
-                return res.status(404).json({ message: 'Тур не найден' })
+            const tour = await tourModel.findById(id);
+
+            if (!tour) {
+                return res.status(404).json({ message: 'Тур не найден' });
             }
-            res.status(200).json({ message: 'Тур успешно удалён' })
+
+            // Удаляем файлы с сервера
+            await deleteFiles(tour.imageCover);
+            await deleteFiles(tour.hotels);
+
+            // Удаление изображений из program[].images
+            for (const programItem of tour.program) {
+                await deleteFiles(programItem.images);
+            }
+
+            // Удаляем сам тур из базы
+            await tourModel.findByIdAndDelete(id);
+
+            res.status(200).json({ message: 'Тур и его изображения успешно удалены' });
         } catch (error) {
+            next(error);
+        }
+    }
+
+    async uploadFiles(req, res, next) {
+        try {
+            if (!req.files || req.files.length === 0) {
+                return res.status(400).json({ message: 'Нет загруженных файлов' });
+            }
+
+            const uploadDir = path.join(__dirname, '../uploads');
+
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+
+            const filePromises = req.files.map(async (file) => {
+                const fileId = path.parse(file.originalname).name;
+                const filePath = path.join(uploadDir, `${fileId}.webp`)
+
+                await sharp(file.buffer)
+                    .webp({ quality: 75 })
+                    .toFile(filePath);
+
+                return { src: `/uploads/${fileId}.webp` };
+            });
+
+            const uploadedFiles = await Promise.all(filePromises);
+            res.status(200).json({ message: 'Файлы загружены и сжаты', files: uploadedFiles });
+        } catch (error) {
+            console.error("Ошибка загрузки файлов:", error);
             next(error);
         }
     }
 }
 
-module.exports = new TourController()
+module.exports = new TourController();
