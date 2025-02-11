@@ -1,5 +1,5 @@
 const tourModel = require('../models/tour-model');
-const { buildFilterQuery } = require('../utils/buildFilterQuery');
+const { buildFilterQuery, filterToursByDuration } = require('../utils/buildFilterQuery');
 const { buildSortQuery } = require('../utils/buildSortQuery');
 const path = require('path');
 const fs = require('fs');
@@ -29,10 +29,10 @@ class TourController {
         try {
             const { sort, filter, admin = "false", limit = "10", page = "1" } = req.query;
 
-            const parsedSort = sort ? JSON.parse(sort) : {};
+            const parsedSort = sort ? JSON.parse(sort) : {}; 
             const sorting = buildSortQuery(parsedSort);
 
-            const parsedFilter = filter ? JSON.parse(filter) : {};
+            const parsedFilter = filter ? JSON.parse(filter) : {}; 
             const filters = buildFilterQuery(parsedFilter);
 
             const parsedLimit = parseInt(limit, 10) || 10;
@@ -43,10 +43,12 @@ class TourController {
                 filters.isPublished = true;
             }
 
-            const tours = await tourModel.find(filters)
+            let tours = await tourModel.find(filters)
                 .sort(sorting)
                 .skip((parsedPage - 1) * parsedLimit)
                 .limit(parsedLimit);
+
+            tours = filterToursByDuration(tours, parsedFilter.duration);
 
             const allTours = await tourModel.countDocuments(filters);
 
