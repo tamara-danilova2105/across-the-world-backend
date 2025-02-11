@@ -106,7 +106,7 @@ router.delete('/reviews/:id', deleteReview)
 
 router.get('/timer', getTimer)
 router.post('/timer', uploadNews.array('photos', 2), addNewTimer)
-router.put('/timer', editTimer)
+router.put('/timer/:id', uploadNews.array('photos', 2), editTimer)
 router.delete('/timer', deleteTimer)
 
 router.post('/subscribe', sendMessage)

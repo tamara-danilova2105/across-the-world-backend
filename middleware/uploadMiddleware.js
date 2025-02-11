@@ -23,7 +23,7 @@ const createStorage = (folder = 'uploads') => {
         fileFilter: (req, file, cb) => {
             const allowedTypes = /jpeg|jpg|png|webp|gif/; //уберу webp, пока тестирую
             const isValid = allowedTypes.test(file.mimetype);
-            isValid ? cb(null, true) : cb(new Error('Неверный тип файла.'));
+            isValid ? cb(null, true) : cb(new Error('Неверный тип файла.')); 
         }
     });
 };
