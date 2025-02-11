@@ -108,7 +108,7 @@ class BlogController {
             existingBlog.description = description;
             existingBlog.photos = finalPhotos;
 
-            const updatedBlog = await existingBlog.save();
+            const updatedBlog = await existingBlog.save(); 
 
             res.status(200).json({ message: 'Новость обновлена', updatedBlog });
         } catch (error) {
