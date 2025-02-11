@@ -76,8 +76,17 @@ class TourController {
 
     async addTour(req, res, next) {
         try {
-            // Убираем undefined, чтобы не сохранять пустые значения
             const cleanedData = JSON.parse(JSON.stringify(req.body));
+
+            cleanedData.dates = cleanedData.dates.map(date => ({
+                ...date,
+                spots: date.spots !== undefined ? Number(date.spots) : Number(date.spotsTotal),
+                spotsTotal: Number(date.spotsTotal),
+                price: {
+                    ...date.price,
+                    amount: Number(date.price.amount)
+                }
+            }));
 
             const newTour = new tourModel(cleanedData);
             const savedTour = await newTour.save();
@@ -88,6 +97,7 @@ class TourController {
             next(error);
         }
     }
+
 
     async editTour(req, res, next) {
         try {
@@ -108,6 +118,9 @@ class TourController {
         try {
             const { id } = req.params;
             const { dates, isPublished } = req.body;
+
+            console.log(req.body);
+
 
             const updateFields = {};
             if (dates) updateFields.dates = dates;
@@ -138,16 +151,13 @@ class TourController {
                 return res.status(404).json({ message: 'Тур не найден' });
             }
 
-            // Удаляем файлы с сервера
             await deleteFiles(tour.imageCover);
             await deleteFiles(tour.hotels);
 
-            // Удаление изображений из program[].images
             for (const programItem of tour.program) {
                 await deleteFiles(programItem.images);
             }
 
-            // Удаляем сам тур из базы
             await tourModel.findByIdAndDelete(id);
 
             res.status(200).json({ message: 'Тур и его изображения успешно удалены' });

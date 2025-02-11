@@ -1,15 +1,37 @@
 const mongoose = require('mongoose');
 
 const priceSchema = new mongoose.Schema({
-    amount: { type: Number, required: true },
-    currency: { type: String, enum: ['₽', '$'], required: true },
+    amount: { 
+        type: Number, 
+        required: true,
+        set: v => Number(v)
+    },
+    currency: { type: String, enum: ['₽', '$', '€'], required: true },
 });
 
 const dateTourSchema = new mongoose.Schema({
     date_start: { type: Date, required: true },
     date_finish: { type: Date, required: true },
     price: { type: priceSchema, required: true },
-    spots: { type: Number, required: true, min: 0 },
+    spots: { 
+        type: Number, 
+        min: 0,
+        default: function () { return this.spotsTotal; }, 
+        set: v => Number(v)
+    },
+    spotsTotal: { 
+        type: Number, 
+        required: true, 
+        min: 0,
+        set: v => Number(v)
+    },
+});
+
+dateTourSchema.pre("save", function (next) {
+    if (this.spots === undefined || this.spots === null) {
+        this.spots = this.spotsTotal;
+    }
+    next();
 });
 
 const locationSchema = new mongoose.Schema({
