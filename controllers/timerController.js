@@ -50,10 +50,12 @@ class TimerController {
                 description,
                 region,
                 timer,
-                imagesWithDetail
+                imagesWithDetails: imagesWithDetail
             });
     
             const savedTimer = await newTimer.save();
+
+            console.log(savedTimer)
     
             res.status(200).json({ 
                 message: 'Таймер добавлен', 
@@ -65,23 +67,39 @@ class TimerController {
     }
 
     async editTimer(req, res, next) {
-        try{
-            const updatedTimer = await TimerModel.findByIdAndUpdate(
-                req.body,
-                { new: true })
-            
-            if(!updatedTimer) {
-                res.status(404).json({ message: 'Таймер не найден' })
+        try {
+            const { id } = req.params;
+            const { title, description, region, timer, imagesWithDetails } = req.body;
+            const files = req.files;
+
+            if (!id) {
+                return res.status(400).json({ message: 'ID таймера не указан' });
+            }
+    
+            const existingTimer = await TimerModel.findById(id);
+            if (!existingTimer) {
+                return res.status(404).json({ message: 'Таймер не найден' });
             }
 
-            res.status(200).json({
-                message: 'Таймер обновлен',
-                updatedTimer
-            })
-        } catch(e) {
-            next(e)
+            const newFiles = await Promise.all(files.map(async (file) => {
+                const optimizedSrc = await saveFile(file);
+                return { _id: crypto.randomUUID(), src: optimizedSrc };
+            }));
+    
+            existingTimer.title = title;
+            existingTimer.description = description;
+            existingTimer.region = region;
+            existingTimer.timer = timer;
+            existingTimer.imagesWithDetails = JSON.parse(imagesWithDetails);
+            existingTimer.files = [...(existingTimer.files || []), ...newFiles];
+    
+            const updatedTimer = await existingTimer.save();
+    
+            res.status(200).json({ message: 'Таймер обновлён', updatedTimer });
+        } catch (error) {
+            next(error);
         }
-    }
+    }  
 
     async deleteTimer(req, res, next) {
         try {
@@ -98,4 +116,4 @@ class TimerController {
     }
 }
 
-module.exports = new TimerController()
+module.exports = new TimerController() 
