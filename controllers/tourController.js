@@ -31,7 +31,7 @@ class TourController {
 
             const parsedSort = sort ? JSON.parse(sort) : {}; 
             const sorting = buildSortQuery(parsedSort);
-
+            
             const parsedFilter = filter ? JSON.parse(filter) : {}; 
             const filters = buildFilterQuery(parsedFilter);
 
@@ -47,6 +47,7 @@ class TourController {
                 .sort(sorting)
                 .skip((parsedPage - 1) * parsedLimit)
                 .limit(parsedLimit);
+
 
             tours = filterToursByDuration(tours, parsedFilter.duration);
 

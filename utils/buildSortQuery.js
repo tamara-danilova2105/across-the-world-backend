@@ -1,11 +1,25 @@
-module.exports.buildSortQuery = ({ sortOption }) => {
-    const sortMap = {
-        new: { createdAt: -1 },
-        soon: { 'dates.date_start': 1 }, 
-        cheaper: { 'dates.price.amount': 1 },
-        expensively: { 'dates.price.amount': -1 },
-        discount: { 'discount.percentage': -1 }, 
+module.exports.buildSortQuery = (sortOption) => {
+    if (!sortOption || Object.keys(sortOption).length === 0) {
+        return { createdAt: -1 };
     }
 
-    return sortMap[sortOption] || {}
+    switch (sortOption.option) {
+        case 'new':
+            return { createdAt: -1 };
+
+        case 'soon':
+            return { 'dates.0.date_start': 1 };
+
+        case 'cheaper':
+            return { 'dates.0.price.amount': 1 };
+
+        case 'expensively':
+            return { 'dates.0.price.amount': -1 };
+
+        case 'discount':
+            return { 'discount.percentage': -1 };
+
+        default:
+            return { createdAt: -1 };
+    }
 }
