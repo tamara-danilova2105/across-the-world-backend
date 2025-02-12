@@ -29,6 +29,8 @@ class TourController {
         try {
             const { sort, filter, admin = "false", limit = "10", page = "1" } = req.query;
 
+            console.log(filter)
+
             const parsedSort = sort ? JSON.parse(sort) : {}; 
             const sorting = buildSortQuery(parsedSort);
             
