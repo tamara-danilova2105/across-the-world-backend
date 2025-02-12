@@ -1,6 +1,8 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config()
-const {resetPasswordTemplate} = require('../templates/resetPassword-template')
+const {resetPasswordTemplate} = require('../templates/resetPassword-template');
+const { userTemplate } = require('../templates/user-template');
+const { adminTemplate } = require('../templates/admin-template');
 
 class MailService {
     constructor() {
