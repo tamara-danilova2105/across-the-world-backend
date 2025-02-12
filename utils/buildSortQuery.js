@@ -20,6 +20,6 @@ module.exports.buildSortQuery = (sortOption) => {
             return { 'discount.percentage': -1 };
 
         default:
-            return { createdAt: -1 };
+            return { createdAt: -1 }; 
     }
 }
