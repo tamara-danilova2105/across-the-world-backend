@@ -191,9 +191,7 @@
                         "description": "Тур не найден"
                     }
                 }
-            }
-        },
-        "/tours/{id}/details": {
+            },
             "patch": {
                 "tags": [
                     "Tours"
@@ -217,7 +215,34 @@
                                 "dates": {
                                     "type": "array",
                                     "items": {
-                                        "type": "string"
+                                        "type": "object",
+                                        "properties": {
+                                            "date_start": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "date_finish": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "price": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "amount": {
+                                                        "type": "number"
+                                                    },
+                                                    "currency": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "spots": {
+                                                "type": "integer"
+                                            },
+                                            "spotsTotal": {
+                                                "type": "integer"
+                                            }
+                                        }
                                     }
                                 },
                                 "isPublished": {

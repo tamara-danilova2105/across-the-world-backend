@@ -18,7 +18,7 @@ class RegionController {
                 query.region = new RegExp(`^${search}`, 'i');
             }
 
-            const regions = await RegionModel.find(query);
+            const regions = await RegionModel.find(query).sort({ region: 1 });
             res.status(200).json(regions);
         } catch (e) {
             next(e);
