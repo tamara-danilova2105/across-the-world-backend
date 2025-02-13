@@ -6,16 +6,18 @@ const fs = require('fs');
 const sharp = require('sharp');
 const { promisify } = require('util');
 
-const unlinkAsync = promisify(fs.unlink);
-
 const deleteFiles = async (images) => {
     if (!images || images.length === 0) return;
 
     await Promise.all(
-        images.map(async (image) => {
-            const imagePath = path.join(__dirname, '..', image.src);
+        images.map(async (imageName) => {
+            if (!imageName) return;
+
+            const decodedImageName = decodeURIComponent(imageName);
+            const imagePath = path.join(__dirname, '..', 'uploads', decodedImageName);
+
             try {
-                await unlinkAsync(imagePath);
+                await fs.promises.unlink(imagePath);
                 console.log(`Удален файл: ${imagePath}`);
             } catch (err) {
                 console.error(`Ошибка удаления файла ${imagePath}:`, err.message);
@@ -29,10 +31,10 @@ class TourController {
         try {
             const { sort, filter, admin = "false", limit = "10", page = "1" } = req.query;
 
-            const parsedSort = sort ? JSON.parse(sort) : {}; 
+            const parsedSort = sort ? JSON.parse(sort) : {};
             const sorting = buildSortQuery(parsedSort);
 
-            const parsedFilter = filter ? JSON.parse(filter) : {}; 
+            const parsedFilter = filter ? JSON.parse(filter) : {};
             const filters = buildFilterQuery(parsedFilter);
 
             const parsedLimit = parseInt(limit, 10) || 10;
@@ -104,15 +106,21 @@ class TourController {
     async editTour(req, res, next) {
         try {
             const { id } = req.params;
-            const updatedTour = await tourModel.findByIdAndUpdate(
-                id, req.body,
-                { new: true })
-            if (!updatedTour) {
-                return res.status(404).json({ message: 'Тур не найден' })
+            const { deletedImages, ...updateData } = req.body;
+
+            if (Array.isArray(deletedImages) && deletedImages.length > 0) {
+                await deleteFiles(deletedImages);
             }
-            res.status(200).json(updatedTour)
+
+            const updatedTour = await tourModel.findByIdAndUpdate(id, updateData, { new: true });
+
+            if (!updatedTour) {
+                return res.status(404).json({ message: 'Тур не найден' });
+            }
+
+            res.status(200).json(updatedTour);
         } catch (error) {
-            next(error)
+            next(error);
         }
     }
 
@@ -120,9 +128,6 @@ class TourController {
         try {
             const { id } = req.params;
             const { dates, isPublished } = req.body;
-
-            console.log(req.body);
-
 
             const updateFields = {};
             if (dates) updateFields.dates = dates;
@@ -153,12 +158,19 @@ class TourController {
                 return res.status(404).json({ message: 'Тур не найден' });
             }
 
-            await deleteFiles(tour.imageCover);
-            await deleteFiles(tour.hotels);
+            // Убираем префикс '/uploads/' перед созданием объектов { src: "файл.webp" }
+            const cleanPath = (src) => src.replace(/^\/?uploads\//, "");
 
-            for (const programItem of tour.program) {
-                await deleteFiles(programItem.images);
-            }
+            // Преобразуем массив объектов в массив строк
+            const imageCoverFiles = tour.imageCover.map(img => cleanPath(img.src));
+            const hotelFiles = tour.hotels.map(img => cleanPath(img.src));
+            const programImages = tour.program.flatMap(programItem => 
+                programItem.images.map(img => cleanPath(img.src))
+            );
+
+            await deleteFiles(imageCoverFiles);
+            await deleteFiles(hotelFiles);
+            await deleteFiles(programImages);
 
             await tourModel.findByIdAndDelete(id);
 
