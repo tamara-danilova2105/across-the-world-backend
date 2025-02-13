@@ -4,7 +4,6 @@ const { buildSortQuery } = require('../utils/buildSortQuery');
 const path = require('path');
 const fs = require('fs');
 const sharp = require('sharp');
-const { promisify } = require('util');
 
 const deleteFiles = async (images) => {
     if (!images || images.length === 0) return;
@@ -33,8 +32,8 @@ class TourController {
 
             const parsedSort = sort ? JSON.parse(sort) : {};
             const sorting = buildSortQuery(parsedSort);
-
-            const parsedFilter = filter ? JSON.parse(filter) : {};
+            
+            const parsedFilter = filter ? JSON.parse(filter) : {}; 
             const filters = buildFilterQuery(parsedFilter);
 
             const parsedLimit = parseInt(limit, 10) || 10;
@@ -49,6 +48,7 @@ class TourController {
                 .sort(sorting)
                 .skip((parsedPage - 1) * parsedLimit)
                 .limit(parsedLimit);
+
 
             tours = filterToursByDuration(tours, parsedFilter.duration);
 

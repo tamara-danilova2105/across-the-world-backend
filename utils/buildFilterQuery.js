@@ -24,6 +24,34 @@ module.exports.buildFilterQuery = (filters) => {
         query['dates.price.amount'] = { $gte: minPrice, $lte: maxPrice };
     }
 
+    if (filters.dates && filters.dates.startDate) {
+        const startDate = new Date(filters.dates.startDate)
+        const endDate = filters.dates.endDate ? new Date(filters.dates.endDate) : null;
+
+        if (endDate) {
+            query['dates'] = {
+                $elemMatch: {
+                    date_start: { $lte: endDate },
+                    date_finish: { $gte: startDate }
+                }
+            }
+            // жесткий вариант фильтрации по датам
+
+            // query['dates'] = {
+            //     $elemMatch: {
+            //         date_start: { $gte: startDate },
+            //         date_finish: { $lte: endDate }
+            //     }
+            // } 
+        } else {
+            query['dates'] = {
+                $elemMatch: {
+                    date_start: { $gte: startDate }
+                }
+            }
+        }
+    }
+
     return query;
 }
 
