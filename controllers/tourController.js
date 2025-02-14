@@ -33,8 +33,8 @@ class TourController {
 
             const parsedSort = sort ? JSON.parse(sort) : {};
             const sorting = buildSortQuery(parsedSort);
-            
-            const parsedFilter = filter ? JSON.parse(filter) : {}; 
+
+            const parsedFilter = filter ? JSON.parse(filter) : {};
             const filters = buildFilterQuery(parsedFilter);
 
             const parsedLimit = parseInt(limit, 10) || 10;
@@ -159,19 +159,39 @@ class TourController {
                 return res.status(404).json({ message: 'Тур не найден' });
             }
 
-            // Убираем префикс '/uploads/' перед созданием объектов { src: "файл.webp" }
             const cleanPath = (src) => src.replace(/^\/?uploads\//, "");
 
-            // Преобразуем массив объектов в массив строк
+            // все изображения тура
             const imageCoverFiles = tour.imageCover.map(img => cleanPath(img.src));
             const hotelFiles = tour.hotels.map(img => cleanPath(img.src));
-            const programImages = tour.program.flatMap(programItem => 
+            const programImages = tour.program.flatMap(programItem =>
                 programItem.images.map(img => cleanPath(img.src))
             );
 
-            await deleteFiles(imageCoverFiles);
-            await deleteFiles(hotelFiles);
-            await deleteFiles(programImages);
+            const allImages = [...imageCoverFiles, ...hotelFiles, ...programImages];
+
+            // туры, в которых используются эти же изображения
+            const toursUsingImages = await tourModel.find({
+                _id: { $ne: id }, // Исключаем текущий тур
+                $or: [
+                    { "imageCover.src": { $in: allImages.map(img => `/uploads/${img}`) } },
+                    { "hotels.src": { $in: allImages.map(img => `/uploads/${img}`) } },
+                    { "program.images.src": { $in: allImages.map(img => `/uploads/${img}`) } },
+                ],
+            });
+
+            //список изображений, которые НЕ используются в других турах
+            const imagesToDelete = allImages.filter(img =>
+                !toursUsingImages.some(tour =>
+                    tour.imageCover.some(i => cleanPath(i.src) === img) ||
+                    tour.hotels.some(i => cleanPath(i.src) === img) ||
+                    tour.program.some(programItem =>
+                        programItem.images.some(i => cleanPath(i.src) === img)
+                    )
+                )
+            );
+
+            await deleteFiles(imagesToDelete);
 
             await tourModel.findByIdAndDelete(id);
 
