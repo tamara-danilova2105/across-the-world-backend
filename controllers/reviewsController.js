@@ -10,7 +10,7 @@ class ReviewController {
             //reviews?isModeration=false&tourId=123
             //3) отображать на странице туров отзывы, которые относятся к этому туру
 
-            const { isModeration, tourId, limit = 10, offset = 0 } = req.query;
+            const { isModeration, tourId, limit = 10, page = 1 } = req.query;
 
             const filter = {};
 
@@ -24,12 +24,12 @@ class ReviewController {
                 filter.tourId = tourId;
             }
 
-            const parsedLimit = Math.max(1, parseInt(limit, 10)) || 10;
-            const parsedOffset = Math.max(0, parseInt(offset, 10)) || 0;
+            const parsedLimit = parseInt(limit, 10) || 10;
+            const parsedPage = parseInt(page, 10) || 1;
 
             const reviews = await ReviewModel.find(filter)
                 .sort({ createdAt: -1 })
-                .skip(parsedOffset)
+                .skip((parsedPage - 1) * parsedLimit)
                 .limit(parsedLimit)
                 .lean();
 
@@ -37,9 +37,9 @@ class ReviewController {
 
             return res.status(200).json({
                 total: totalReviews,
-                limit: parsedLimit,
-                offset: parsedOffset,
+                currentPage: parsedPage,
                 reviews,
+                totalPages: Math.ceil(totalReviews / parsedLimit),
             });
         } catch (e) {
             next(e);

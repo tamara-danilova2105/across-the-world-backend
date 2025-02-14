@@ -66,6 +66,16 @@ class TourController {
         }
     }
 
+    async getTourList(_, res, next) {
+        try {
+            const tourList = await tourModel.find({}, "_id tour");
+
+            res.status(200).json(tourList);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getTourById(req, res, next) {
         try {
             const { id } = req.params;

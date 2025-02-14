@@ -16,7 +16,8 @@ const {
     editTour,
     deleteTour,
     updateTourDetails,
-    uploadFiles
+    uploadFiles,
+    getTourList
 } = require('./controllers/tourController');
 const {
     getAllBlogs,
@@ -83,6 +84,7 @@ router.put('/refresh-password',
 router.put('/refresh', refresh)
 
 router.get('/tours', getAllTours);
+router.get('/tours/list', getTourList);
 router.get('/tours/:id', getTourById);
 router.post('/tours', addTour);
 router.post('/upload', upload.array('files'), uploadFiles);
