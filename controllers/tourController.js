@@ -113,14 +113,38 @@ class TourController {
         }
     }
 
-
     async editTour(req, res, next) {
         try {
             const { id } = req.params;
             const { deletedImages, ...updateData } = req.body;
 
             if (Array.isArray(deletedImages) && deletedImages.length > 0) {
-                await deleteFiles(deletedImages);
+                const formattedDeletedImages = deletedImages.map(img =>
+                    img.startsWith("/uploads/") ? img : `/uploads/${img}`
+                );
+
+                const toursUsingImages = await tourModel.find({
+                    _id: { $ne: id }, // Исключаем текущий тур
+                    $or: [
+                        { "imageCover": { $elemMatch: { src: { $in: formattedDeletedImages } } } },
+                        { "hotels": { $elemMatch: { src: { $in: formattedDeletedImages } } } },
+                        { "program.images": { $elemMatch: { src: { $in: formattedDeletedImages } } } },
+                    ],
+                });
+
+                const imagesToDelete = formattedDeletedImages.filter(img =>
+                    !toursUsingImages.some(tour =>
+                        tour.imageCover.some(i => i.src === img) ||
+                        tour.hotels.some(i => i.src === img) ||
+                        tour.program.some(programItem =>
+                            programItem.images.some(i => i.src === img)
+                        )
+                    )
+                );
+
+                if (imagesToDelete.length > 0) {
+                    await deleteFiles(imagesToDelete);
+                }
             }
 
             const updatedTour = await tourModel.findByIdAndUpdate(id, updateData, { new: true });
@@ -138,78 +162,17 @@ class TourController {
     async updateTourDetails(req, res, next) {
         try {
             const { id } = req.params;
-            const { dates, isPublished, imageCover, hotels, program } = req.body;
-    
-            const tour = await tourModel.findById(id);
-    
-            if (!tour) {
-                return res.status(404).json({ message: "Тур не найден" });
-            }
-    
-            const cleanPath = (src) => src.replace(/^\/?uploads\//, "");
-    
-            // Получаем текущие изображения до обновления
-            const oldImages = {
-                imageCover: tour.imageCover.map(img => cleanPath(img.src)),
-                hotels: tour.hotels.map(img => cleanPath(img.src)),
-                program: tour.program.flatMap(day => day.images.map(img => cleanPath(img.src))),
-            };
-    
-            // Получаем новые изображения из тела запроса (если они переданы)
-            const newImages = {
-                imageCover: imageCover ? imageCover.map(img => cleanPath(img.src)) : oldImages.imageCover,
-                hotels: hotels ? hotels.map(img => cleanPath(img.src)) : oldImages.hotels,
-                program: program ? program.flatMap(day => day.images.map(img => cleanPath(img.src))) : oldImages.program,
-            };
-    
-            // Определяем, какие изображения удалены
-            const deletedImages = [
-                ...oldImages.imageCover.filter(img => !newImages.imageCover.includes(img)),
-                ...oldImages.hotels.filter(img => !newImages.hotels.includes(img)),
-                ...oldImages.program.filter(img => !newImages.program.includes(img))
-            ];
-    
-            if (deletedImages.length > 0) {
-                // Проверяем, используются ли удаленные изображения в других турах
-                const toursUsingImages = await tourModel.find({
-                    _id: { $ne: id },
-                    $or: [
-                        { "imageCover.src": { $in: deletedImages.map(img => `/uploads/${img}`) } },
-                        { "hotels.src": { $in: deletedImages.map(img => `/uploads/${img}`) } },
-                        { "program.images.src": { $in: deletedImages.map(img => `/uploads/${img}`) } },
-                    ],
-                });
-    
-                // Оставляем только изображения, которые больше нигде не используются
-                const imagesToDelete = deletedImages.filter(img =>
-                    !toursUsingImages.some(tour =>
-                        tour.imageCover.some(i => cleanPath(i.src) === img) ||
-                        tour.hotels.some(i => cleanPath(i.src) === img) ||
-                        tour.program.some(programItem =>
-                            programItem.images.some(i => cleanPath(i.src) === img)
-                        )
-                    )
-                );
-    
-                if (imagesToDelete.length > 0) {
-                    await deleteFiles(imagesToDelete);
-                }
-            }
-    
-            // Обновляем тур
+            const { dates, isPublished } = req.body;
+
             const updateFields = {};
             if (dates) updateFields.dates = dates;
             if (typeof isPublished === "boolean") updateFields.isPublished = isPublished;
-            if (imageCover) updateFields.imageCover = imageCover;
-            if (hotels) updateFields.hotels = hotels;
-            if (program) updateFields.program = program;
-    
+
             const updatedTour = await tourModel.findByIdAndUpdate(
                 id,
                 { $set: updateFields },
                 { new: true }
             );
-    
             res.status(200).json(updatedTour);
         } catch (error) {
             next(error);
