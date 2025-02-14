@@ -3,16 +3,16 @@ const { saveFile } = require('../services/uploadService')
 
 class TimerController {
     async getTimer(req, res, next) {
-        try{
+        try {
             const timer = await TimerModel.find()
-
-            if(!timer || timer.length === 0) {
-                res.status(200).json({
+    
+            if (!timer || timer.length === 0) {
+                return res.status(200).json({
                     message: 'Таймер не найден',
-                })
+                });
             }
-
-        res.status(200).json(timer)
+    
+            return res.status(200).json(timer)
         } catch(e) {
             next(e)
         }
