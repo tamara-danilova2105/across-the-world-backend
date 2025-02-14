@@ -16,9 +16,6 @@ module.exports.buildSortQuery = (sortOption) => {
         case 'expensively':
             return { 'dates.0.price.amount': -1 };
 
-        case 'discount':
-            return { 'discount.percentage': -1 };
-
         default:
             return { createdAt: -1 }; 
     }

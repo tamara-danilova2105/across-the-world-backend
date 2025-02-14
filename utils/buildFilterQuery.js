@@ -12,6 +12,13 @@ module.exports.buildFilterQuery = (filters) => {
         }
     }
 
+    if (filters.discount) {
+        const discountKeys = Object.keys(filters.discount).filter(key => filters.discount[key]);
+        if (discountKeys.length) {
+            query.discount = { $exists: true }
+        }
+    }
+
     if (filters.region) {
         const regions = Array.isArray(filters.region)
             ? filters.region

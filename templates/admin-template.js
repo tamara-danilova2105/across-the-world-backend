@@ -35,4 +35,4 @@ const adminTemplate = (email) => `
 </html>
 `
 
-module.exports = { adminTemplate };
+module.exports = { adminTemplate }; 
