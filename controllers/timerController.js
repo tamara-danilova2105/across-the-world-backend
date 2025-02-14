@@ -27,7 +27,7 @@ class TimerController {
                 });
             }
     
-            const { title, description, region, timer, imagesWithDetails } = req.body;
+            const { title, discount, region, timer, hide, imagesWithDetails } = req.body;
             const files = req.files;
 
             const parsedImagesWithDetails = JSON.parse(imagesWithDetails);
@@ -47,9 +47,10 @@ class TimerController {
     
             const newTimer = new TimerModel({
                 title,
-                description,
+                discount,
                 region,
                 timer,
+                hide,
                 imagesWithDetails: imagesWithDetail
             });
     
@@ -69,8 +70,10 @@ class TimerController {
     async editTimer(req, res, next) {
         try {
             const { id } = req.params;
-            const { title, description, region, timer, imagesWithDetails } = req.body;
+            const { title, discount, region, hide, timer, imagesWithDetails } = req.body;
             const files = req.files;
+
+            console.log(title, discount, region, hide, timer, imagesWithDetails)
 
             if (!id) {
                 return res.status(400).json({ message: 'ID таймера не указан' });
@@ -87,9 +90,10 @@ class TimerController {
             }));
     
             existingTimer.title = title;
-            existingTimer.description = description;
+            existingTimer.discount = discount;
             existingTimer.region = region;
             existingTimer.timer = timer;
+            existingTimer.hide = hide;
             existingTimer.imagesWithDetails = JSON.parse(imagesWithDetails);
             existingTimer.files = [...(existingTimer.files || []), ...newFiles];
     
@@ -113,7 +117,7 @@ class TimerController {
         } catch (e) {
             next(e)
         }
-    }
+    } 
 }
 
 module.exports = new TimerController() 
